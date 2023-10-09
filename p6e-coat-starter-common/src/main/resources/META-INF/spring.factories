@@ -1,0 +1,8 @@
+# Auto Configure
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+club.p6e.coat.common.controller.config.LocalDateTimeSerializerConfig,\
+club.p6e.coat.common.controller.BaseExceptionController,\
+club.p6e.coat.common.controller.BaseVersionController,\
+club.p6e.coat.common.paging.PagingDefaultImpl,\
+club.p6e.coat.common.CustomHook,\
+club.p6e.coat.common.Properties
