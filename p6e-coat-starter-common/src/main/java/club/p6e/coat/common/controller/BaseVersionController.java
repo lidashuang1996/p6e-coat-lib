@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
- * 基础的 controller 类
+ * BaseVersionController
  *
  * @author lidashuang
  * @version 1.0
@@ -21,7 +21,7 @@ public class BaseVersionController extends BaseController {
     /**
      * 注入的 BEAN 的名称
      */
-    public static final String BEAN_NAME = "com.darvi.hksi.badminton.lib.controller.BaseVersionController";
+    public static final String BEAN_NAME = "club.p6e.coat.common.controller.BaseVersionController";
 
     /**
      * 配置文件对象

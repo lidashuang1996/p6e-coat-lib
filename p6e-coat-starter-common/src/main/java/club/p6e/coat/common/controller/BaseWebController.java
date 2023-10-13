@@ -6,7 +6,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 /**
- * 基础的 controller 类
+ * BaseWebController
  *
  * @author lidashuang
  * @version 1.0

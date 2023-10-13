@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -19,7 +18,6 @@ import java.util.Arrays;
  * @author lidashuang
  * @version 1.0
  */
-@Component
 public class CrossDomainWebFluxFilter implements WebFilter {
 
     /**
@@ -41,19 +39,13 @@ public class CrossDomainWebFluxFilter implements WebFilter {
      * 跨域配置 ACCESS_CONTROL_ALLOW_HEADERS
      */
     private static final String[] ACCESS_CONTROL_ALLOW_HEADERS = new String[]{
-            "Authorization",
-            "Content-Type",
-            "Depth",
-            "User-Agent",
-            "X-File-Size",
-            "X-Requested-With",
-            "X-Requested-By",
-            "If-Modified-Since",
-            "X-File-Name",
-            "X-File-Type",
-            "Cache-Control",
+            "Accept",
+            "Host",
             "Origin",
-            "Client"
+            "Referer",
+            "User-Agent",
+            "Content-Type",
+            "Authorization"
     };
 
     /**
@@ -72,17 +64,17 @@ public class CrossDomainWebFluxFilter implements WebFilter {
     public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         final ServerHttpRequest request = exchange.getRequest();
         final ServerHttpResponse response = exchange.getResponse();
+        final String origin = request.getHeaders().getOrigin();
         response.getHeaders().setAccessControlMaxAge(ACCESS_CONTROL_MAX_AGE);
-        response.getHeaders().setAccessControlAllowOrigin(ACCESS_CONTROL_ALLOW_ORIGIN);
+        response.getHeaders().setAccessControlAllowOrigin(origin == null ? ACCESS_CONTROL_ALLOW_ORIGIN : origin);
         response.getHeaders().setAccessControlAllowCredentials(ACCESS_CONTROL_ALLOW_CREDENTIALS);
         response.getHeaders().setAccessControlAllowHeaders(Arrays.asList(ACCESS_CONTROL_ALLOW_HEADERS));
         response.getHeaders().setAccessControlAllowMethods(Arrays.asList(ACCESS_CONTROL_ALLOW_METHODS));
         // OPTIONS 请求直接返回成功
-        if (HttpMethod.OPTIONS.matches(request.getMethodValue().toUpperCase())) {
+        if (HttpMethod.OPTIONS.matches(request.getMethod().name().toUpperCase())) {
             response.setStatusCode(HttpStatus.OK);
             return Mono.empty();
-        } else {
-            return chain.filter(exchange);
         }
+        return chain.filter(exchange.mutate().response(response).build());
     }
 }

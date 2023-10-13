@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -49,19 +50,13 @@ public class CrossDomainWebFilter implements Filter {
      * 跨域配置 ACCESS_CONTROL_ALLOW_HEADERS
      */
     private static final String[] ACCESS_CONTROL_ALLOW_HEADERS = new String[]{
-            "Authorization",
-            "Content-Type",
-            "Depth",
-            "User-Agent",
-            "X-File-Size",
-            "X-Requested-With",
-            "X-Requested-By",
-            "If-Modified-Since",
-            "X-File-Name",
-            "X-File-Type",
-            "Cache-Control",
+            "Accept",
+            "Host",
             "Origin",
-            "Client"
+            "Referer",
+            "User-Agent",
+            "Content-Type",
+            "Authorization"
     };
 
     /**
@@ -126,7 +121,7 @@ public class CrossDomainWebFilter implements Filter {
         // 关 HTTP OPTIONS 请求的唯一响应是 200 ，但是有一些情况，例如当内容长度为 0 时，一个 204 会更合适
         if (HttpMethod.OPTIONS.matches(request.getMethod().toUpperCase())) {
             // 返回 200 或者 204
-            response.setStatus(200);
+            response.setStatus(HttpStatus.OK.value());
         } else {
             // 进入内部执行后续的方法
             filterChain.doFilter(servletRequest, servletResponse);

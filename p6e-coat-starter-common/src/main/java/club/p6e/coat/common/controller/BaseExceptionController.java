@@ -4,19 +4,26 @@ import club.p6e.coat.common.context.ResultContext;
 import club.p6e.coat.common.error.CustomException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import reactor.core.publisher.Mono;
 
 /**
- * 基础的异常全局处理
+ * BaseExceptionController
  *
  * @author lidashuang
  * @version 1.0
  */
 @ControllerAdvice
+@Component(BaseExceptionController.BEAN_NAME)
 public class BaseExceptionController {
+
+    /**
+     * 注入的 BEAN 的名称
+     */
+    public static final String BEAN_NAME = "club.p6e.coat.common.controller.BaseExceptionController";
 
     /**
      * 注入日志对象
@@ -24,7 +31,7 @@ public class BaseExceptionController {
     private final static Logger LOGGER = LoggerFactory.getLogger(BaseExceptionController.class);
 
     @ResponseBody
-    @SuppressWarnings("all")
+    @SuppressWarnings("ALL")
     @ExceptionHandler(value = Exception.class)
     public Object errorHandler(Exception exception) {
         LOGGER.error(exception.getMessage());
@@ -42,9 +49,9 @@ public class BaseExceptionController {
     }
 
     /**
-     * 是否包含 javax.servlet.ServletRequest 对象
+     * 获取是否包含 javax.servlet.ServletRequest 对象
      *
-     * @return 结果
+     * @return 是否包含 javax.servlet.ServletRequest 对象
      */
     private boolean isServletRequest() {
         boolean bool = true;

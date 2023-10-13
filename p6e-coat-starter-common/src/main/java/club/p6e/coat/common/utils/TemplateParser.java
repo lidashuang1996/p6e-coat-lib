@@ -11,22 +11,22 @@ public final class TemplateParser {
     /**
      * 标记开始的符号
      */
-    private static final String START_CHAR = "$";
+    public static final String START_CHAR = "$";
 
     /**
      * 内容结束的符号
      */
-    private static final String CONTENT_END_CHAR = "}";
+    public static final String CONTENT_END_CHAR = "}";
 
     /**
      * 内容开始的符号
      */
-    private static final String CONTENT_START_CHAR = "{";
+    public static final String CONTENT_START_CHAR = "{";
 
     /**
      * 内容默认值的符号
      */
-    private static final String CONTENT_DEFAULT_VALUE_CHAR = ":";
+    public static final String CONTENT_DEFAULT_VALUE_CHAR = ":";
 
     /**
      * 执行解析模板的内容
@@ -122,7 +122,7 @@ public final class TemplateParser {
             for (int i = content.length() - 1; i >= 0; i--) {
                 final String ch = String.valueOf(content.charAt(i));
                 if (CONTENT_DEFAULT_VALUE_CHAR.equals(ch)) {
-                    return result.length() > 0 ? result.toString() : null;
+                    return result.isEmpty() ? null : result.toString();
                 } else {
                     result.append(content.charAt(i));
                 }

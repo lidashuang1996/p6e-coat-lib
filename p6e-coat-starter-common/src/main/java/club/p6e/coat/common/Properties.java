@@ -1,9 +1,11 @@
 package club.p6e.coat.common;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,14 +14,15 @@ import java.util.Map;
  * @version 1.0
  */
 @Data
+@Accessors(chain = true)
 @Component(value = Properties.BEAN_NAME)
-@ConfigurationProperties(prefix = "hksi.badminton.lib")
-public class Properties {
+@ConfigurationProperties(prefix = "p6e.coat.common")
+public class Properties implements Serializable {
 
     /**
      * 注入的 BEAN 的名称
      */
-    public static final String BEAN_NAME = "com.darvi.hksi.badminton.lib.Properties";
+    public static final String BEAN_NAME = "club.p6e.coat.common.Properties";
 
     /**
      * 版本号
@@ -48,6 +51,7 @@ public class Properties {
          * 凭证
          */
         private String[] vouchers = new String[]{};
+
     }
 
     @Data
