@@ -1,6 +1,5 @@
 package club.p6e.coat.common.utils;
 
-import club.p6e.coat.common.error.FileException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.FileUrlResource;
@@ -11,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -23,6 +23,7 @@ import java.util.function.Predicate;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public final class FileUtil {
 
     /**
@@ -347,11 +348,8 @@ public final class FileUtil {
                 return Flux.error(e);
             }
         } else {
-            return Flux.error(new FileException(
-                    FileUtil.class,
-                    "fun readFile(File file). -> The read content is not a file.",
-                    400,
-                    "The read content is not a file"
+            return Flux.error(new FileNotFoundException(
+                    "fun readFile(File file). -> The read content is not a file.The read content is not a file"
             ));
         }
     }
@@ -519,6 +517,7 @@ public final class FileUtil {
      * @param file  合并后的文件对象
      * @return 合并后的文件对象
      */
+    @SuppressWarnings("ALL")
     public static Mono<File> mergeFileSlice(File[] files, File file) {
         if (files == null
                 || file == null

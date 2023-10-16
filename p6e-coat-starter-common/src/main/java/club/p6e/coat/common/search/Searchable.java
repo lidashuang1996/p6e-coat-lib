@@ -1,4 +1,4 @@
-package club.p6e.coat.common;
+package club.p6e.coat.common.search;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +11,9 @@ import java.lang.annotation.Target;
  */
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Sortable {
-    String value() default "";
+public @interface Searchable {
+    String name() default "";
+
+    String column() default "";
 
 }

@@ -4,7 +4,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.logging.XMLFormatter;
 
 /**
  * CopyUtil
@@ -13,6 +12,7 @@ import java.util.logging.XMLFormatter;
  * @author lidashuang
  * @version 2.0
  */
+@SuppressWarnings("ALL")
 public final class CopyUtil {
 
     /**
@@ -73,11 +73,16 @@ public final class CopyUtil {
      */
     public static <T> T run(Object sourceObject, Class<T> targetClass, T defaultTargetObject, boolean isDeepClone) {
         try {
-            if (sourceObject == null || targetClass == null) {
+            if (sourceObject == null
+                    || targetClass == null
+                    || isMapType(targetClass)
+                    || isIterableType(targetClass)
+                    || isMapType(sourceObject.getClass())
+                    || isIterableType(sourceObject.getClass())) {
                 return defaultTargetObject;
             } else {
                 final T targetObject = targetClass.getDeclaredConstructor().newInstance();
-                return run(sourceObject, targetObject, defaultTargetObject);
+                return run(sourceObject, targetObject, defaultTargetObject, isDeepClone);
             }
         } catch (Exception e) {
             return defaultTargetObject;
@@ -120,6 +125,7 @@ public final class CopyUtil {
      * @param <T>                 转换的目标泛型
      * @return 目标数据对象
      */
+    @SuppressWarnings("ALL")
     public static <T> T run(Object sourceObject, T targetObject, T defaultTargetObject) {
         return run(sourceObject, targetObject, defaultTargetObject, false);
     }
@@ -134,150 +140,173 @@ public final class CopyUtil {
      * @param <T>                 转换的目标泛型
      * @return 目标数据对象
      */
+    @SuppressWarnings("ALL")
     public static <T> T run(Object sourceObject, T targetObject, T defaultTargetObject, boolean isDeepClone) {
+        if (sourceObject == null
+                || isMapType(sourceObject.getClass())
+                || isIterableType(sourceObject.getClass())
+                || isMapType(targetObject.getClass())
+                || isIterableType(targetObject.getClass())
+                || !isSupportSerializable(sourceObject.getClass())
+                || !isSupportSerializable(targetObject.getClass())) {
+            return defaultTargetObject;
+        }
         try {
-            if (sourceObject == null || targetObject == null) {
-                return defaultTargetObject;
-            } else {
-                final Class<?> sourceClass = sourceObject.getClass();
-                final Class<?> targetClass = targetObject.getClass();
-                if (!isSupportSerializable(sourceClass) || !isSupportSerializable(targetClass)) {
-                    return defaultTargetObject;
-                }
-                final Field[] sourceFields = getFields(sourceClass);
-                final Field[] targetFields = getFields(targetClass);
-                for (final Field sourceField : sourceFields) {
-                    for (final Field targetField : targetFields) {
-                        if (sourceField.getName().equals(targetField.getName())) {
-                            sourceField.setAccessible(true);
-                            targetField.setAccessible(true);
-                            final Object sourceFieldData = sourceField.get(sourceObject);
-                            if (sourceFieldData != null) {
-                                if (sourceField.getType() == targetField.getType()) {
-                                    if (isIterableType(sourceField.getType())
-                                            && isCollectionType(targetField.getType())) {
-                                        final List<List<Class<?>>> sourceFieldGeneric = getFieldGenericClass(sourceField);
-                                        final List<List<Class<?>>> targetFieldGeneric = getFieldGenericClass(targetField);
-                                        if (!sourceFieldGeneric.isEmpty() && !targetFieldGeneric.isEmpty()) {
-                                            if (sourceFieldGeneric.get(0).size() == targetFieldGeneric.get(0).size()) {
-                                                if (isIterableType(sourceFieldGeneric[0])
-                                                        && isCollectionType(targetFieldGeneric[0])) {
-                                                    targetField.set(targetObject, runList(
-                                                            (Iterable<?>) sourceFieldData,
-                                                            targetFieldGeneric[0],
+            final Class<?> sourceClass = sourceObject.getClass();
+            final Class<?> targetClass = targetObject.getClass();
+            final Field[] sourceFields = getFields(sourceClass);
+            final Field[] targetFields = getFields(targetClass);
+            for (final Field sourceField : sourceFields) {
+                for (final Field targetField : targetFields) {
+                    if (sourceField.getName().equals(targetField.getName())) {
+                        sourceField.setAccessible(true);
+                        targetField.setAccessible(true);
+                        final Object sourceFieldData = sourceField.get(sourceObject);
+                        if (sourceFieldData != null) {
+                            if (sourceField.getType() == targetField.getType()) {
+                                if (isIterableType(sourceField.getType())
+                                        && isCollectionType(targetField.getType())) {
+                                    final List<List<Class<?>>> sourceFieldGeneric = getFieldGenericClass(sourceField);
+                                    final List<List<Class<?>>> targetFieldGeneric = getFieldGenericClass(targetField);
+                                    if (!sourceFieldGeneric.isEmpty()
+                                            && !targetFieldGeneric.isEmpty()
+                                            && sourceFieldGeneric.get(0).size() == 1
+                                            && targetFieldGeneric.get(0).size() == 1
+                                            && !isMapType(sourceFieldGeneric.get(0).get(0))
+                                            && !isMapType(targetFieldGeneric.get(0).get(0))
+                                            && !isIterableType(sourceFieldGeneric.get(0).get(0))
+                                            && !isIterableType(targetFieldGeneric.get(0).get(0))
+                                            && isSupportSerializable(sourceFieldGeneric.get(0).get(0))
+                                            && isSupportSerializable(targetFieldGeneric.get(0).get(0))) {
+                                        final List<Object> targetFieldDataIterable = new ArrayList<>();
+                                        final Iterable<?> sourceFieldDataIterable = (Iterable<?>) sourceFieldData;
+                                        for (final Object item : sourceFieldDataIterable) {
+                                            Object targetFieldDataIterableItem = null;
+                                            if (item != null) {
+                                                if (sourceFieldGeneric.get(0).get(0)
+                                                        != targetFieldGeneric.get(0).get(0)) {
+                                                    targetFieldDataIterableItem = run(
+                                                            item,
+                                                            targetFieldGeneric.get(0).get(0),
                                                             null,
                                                             isDeepClone
-                                                    ));
-                                                } else if (isMapType(sourceFieldGeneric[0])
-                                                        && isMapType(targetFieldGeneric[0])) {
-
+                                                    );
                                                 } else {
-                                                    targetField.set(targetObject, clone(sourceFieldData, isDeepClone));
-                                                }
-                                            } else {
-                                                if (isSupportSerializable(sourceFieldGeneric[0])
-                                                        && isSupportSerializable(targetFieldGeneric[0])
-                                                        && !isMapType(sourceFieldGeneric[0])
-                                                        && !isMapType(targetFieldGeneric[0])
-                                                        && !isIterableType(sourceFieldGeneric[0])
-                                                        && !isCollectionType(targetFieldGeneric[0])) {
-                                                    targetField.set(targetObject, run(
-                                                            sourceFieldData,
-                                                            targetFieldGeneric[0],
-                                                            null,
-                                                            isDeepClone
-                                                    ));
-                                                } else if (isSupportSerializable(sourceFieldGeneric[0])
-                                                        && isSupportSerializable(targetFieldGeneric[0])
-                                                        && isMapType(sourceFieldGeneric[0])
-                                                        && !isMapType(targetFieldGeneric[0])
-                                                        && !isCollectionType(targetFieldGeneric[0])) {
-                                                    sourceFieldGeneric[0]
-
-                                                    targetField.set(targetObject, runMap(
-                                                            sourceFieldData,
-                                                            targetFieldGeneric[0],
-                                                            null,
-                                                            isDeepClone
-                                                    ));
+                                                    targetFieldDataIterableItem = clone(item, isDeepClone);
                                                 }
                                             }
-                                        } else {
-
-                                        }
-
-                                        final Iterable<?> iterable = (Iterable<?>) sourceFieldData;
-                                        for (final Object item : iterable) {
-
-                                        }
-                                        System.out.println(targetField);
-//                                        targetField.set(targetObject, runList(iterable, targetField.getType(), null, isDeepClone));
-                                    } else if (isMapType(sourceField.getType()) && isMapType(targetField.getType())) {
-                                        System.out.println(sourceField);
-                                        System.out.println(targetField);
-                                        final List<List<Class<?>>> sourceFieldGeneric = getFieldGenericClass(sourceField);
-                                        final List<List<Class<?>>> targetFieldGeneric = getFieldGenericClass(targetField);
-                                        if (!sourceFieldGeneric.isEmpty()
-                                                && !targetFieldGeneric.isEmpty()
-                                                && sourceFieldGeneric.get(0).size() == 2
-                                                && targetFieldGeneric.get(0).size() == 2) {
-                                            final Map map = (Map) targetObject;
-                                            for (final Object key : map.keySet()) {
-                                                
+                                            if (item == null || targetFieldDataIterableItem != null) {
+                                                targetFieldDataIterable.add(targetFieldDataIterableItem);
                                             }
-                                            sourceFieldGeneric.get(0).get(0)
                                         }
-                                    } else {
-                                        targetField.set(targetObject, clone(sourceFieldData, isDeepClone));
+                                        targetField.set(targetObject, targetFieldDataIterable);
+                                    }
+                                } else if (isMapType(sourceField.getType()) && isMapType(targetField.getType())) {
+                                    final List<List<Class<?>>> sourceFieldGeneric = getFieldGenericClass(sourceField);
+                                    final List<List<Class<?>>> targetFieldGeneric = getFieldGenericClass(targetField);
+                                    if (!sourceFieldGeneric.isEmpty()
+                                            && !targetFieldGeneric.isEmpty()
+                                            && sourceFieldGeneric.get(0).size() == 2
+                                            && targetFieldGeneric.get(0).size() == 2
+                                            && !isMapType(sourceFieldGeneric.get(0).get(0))
+                                            && !isMapType(targetFieldGeneric.get(0).get(0))
+                                            && !isMapType(sourceFieldGeneric.get(0).get(1))
+                                            && !isMapType(targetFieldGeneric.get(0).get(1))
+                                            && !isIterableType(sourceFieldGeneric.get(0).get(0))
+                                            && !isIterableType(targetFieldGeneric.get(0).get(0))
+                                            && !isIterableType(sourceFieldGeneric.get(0).get(1))
+                                            && !isIterableType(targetFieldGeneric.get(0).get(1))
+                                            && isSupportSerializable(sourceFieldGeneric.get(0).get(0))
+                                            && isSupportSerializable(targetFieldGeneric.get(0).get(0))
+                                            && isSupportSerializable(sourceFieldGeneric.get(0).get(1))
+                                            && isSupportSerializable(targetFieldGeneric.get(0).get(1))) {
+                                        final Map<Object, Object> targetFieldDataMap = new HashMap<>();
+                                        final Map<?, ?> sourceFieldDataMap = (Map<?, ?>) sourceFieldData;
+                                        for (final Object key : sourceFieldDataMap.keySet()) {
+                                            Object targetFieldDataMapKey = null;
+                                            if (key != null) {
+                                                if (sourceFieldGeneric.get(0).get(0) == targetFieldGeneric.get(0).get(0)) {
+                                                    targetFieldDataMapKey = clone(key, isDeepClone);
+                                                } else {
+                                                    targetFieldDataMapKey = run(
+                                                            key,
+                                                            targetFieldGeneric.get(0).get(0),
+                                                            null,
+                                                            isDeepClone
+                                                    );
+                                                }
+                                            }
+                                            final Object value = sourceFieldDataMap.get(key);
+                                            Object targetFieldDataMapValue = null;
+                                            if (value != null) {
+                                                if (sourceFieldGeneric.get(0).get(1) == targetFieldGeneric.get(0).get(1)) {
+                                                    targetFieldDataMapValue = clone(key, isDeepClone);
+                                                } else {
+                                                    targetFieldDataMapValue = run(
+                                                            value,
+                                                            targetFieldGeneric.get(0).get(1),
+                                                            null,
+                                                            isDeepClone
+                                                    );
+                                                }
+                                            }
+                                            if (value == null || targetFieldDataMapValue != null) {
+                                                targetFieldDataMap.put(targetFieldDataMapKey, targetFieldDataMapValue);
+                                            }
+                                        }
+                                        targetField.set(targetObject, targetFieldDataMap);
                                     }
                                 } else {
-                                    if (isSupportSerializable(sourceField.getType())
-                                            && isSupportSerializable(targetField.getType())
-                                            && !isMapType(sourceField.getType())
-                                            && !isMapType(targetField.getType())
-                                            && !isIterableType(sourceField.getType())
-                                            && !isIterableType(targetField.getType())) {
-                                        targetField.set(targetObject, run(
+                                    targetField.set(targetObject, clone(sourceFieldData, isDeepClone));
+                                }
+                            } else if (isSupportSerializable(sourceField.getType())
+                                    && isSupportSerializable(targetField.getType())
+                                    && !isMapType(sourceField.getType())
+                                    && !isIterableType(sourceField.getType())
+                                    && !isIterableType(targetField.getType())) {
+                                if (isMapType(targetField.getType())) {
+                                    final List<List<Class<?>>> generics = getFieldGenericClass(targetField);
+                                    if (!generics.isEmpty()
+                                            && generics.get(0).size() == 2
+                                            && generics.get(0).get(0) == String.class) {
+                                        targetField.set(targetObject, toMap(
                                                 sourceFieldData,
+                                                null,
+                                                isDeepClone
+                                        ));
+                                    }
+                                } else {
+                                    targetField.set(targetObject, run(
+                                            sourceFieldData,
+                                            targetField.getType(),
+                                            null,
+                                            isDeepClone
+                                    ));
+                                }
+                            } else if (isSupportSerializable(sourceField.getType())
+                                    && isSupportSerializable(targetField.getType())
+                                    && !isMapType(targetField.getType())
+                                    && !isIterableType(sourceField.getType())
+                                    && !isIterableType(targetField.getType())) {
+                                if (isMapType(sourceField.getType())) {
+                                    final List<List<Class<?>>> generics = getFieldGenericClass(sourceField);
+                                    if (!generics.isEmpty()
+                                            && generics.get(0).size() == 2
+                                            && generics.get(0).get(0) == String.class) {
+                                        targetField.set(targetObject, runMap(
+                                                (Map<String, ?>) sourceFieldData,
                                                 targetField.getType(),
                                                 null,
                                                 isDeepClone
                                         ));
-                                    } else if (isSupportSerializable(sourceField.getType())
-                                            && isSupportSerializable(targetField.getType())
-                                            && isMapType(sourceField.getType())
-                                            && !isMapType(targetField.getType())
-                                            && !isIterableType(sourceField.getType())
-                                            && !isIterableType(targetField.getType())) {
-                                        final List<List<Class<?>>> generics = getFieldGenericClass(sourceField);
-                                        if (!generics.isEmpty()
-                                                && generics.get(0).size() == 2
-                                                && generics.get(0).get(0) == String.class) {
-                                            targetField.set(targetObject, runMap(
-                                                    (Map<String, ?>) sourceFieldData,
-                                                    targetField.getType(),
-                                                    null,
-                                                    isDeepClone
-                                            ));
-                                        }
-                                    } else if (isSupportSerializable(sourceField.getType())
-                                            && isSupportSerializable(targetField.getType())
-                                            && isMapType(targetField.getType())
-                                            && !isMapType(sourceField.getType())
-                                            && !isIterableType(sourceField.getType())
-                                            && !isIterableType(targetField.getType())) {
-                                        final List<List<Class<?>>> generics = getFieldGenericClass(targetField);
-                                        if (!generics.isEmpty()
-                                                && generics.get(0).size() == 2
-                                                && generics.get(0).get(0) == String.class
-                                                && generics.get(0).get(0) == Object.class) {
-                                            targetField.set(targetObject, toMap(
-                                                    sourceFieldData,
-                                                    new HashMap<>(),
-                                                    isDeepClone
-                                            ));
-                                        }
                                     }
+                                } else {
+                                    targetField.set(targetObject, run(
+                                            sourceFieldData,
+                                            targetField.getType(),
+                                            null,
+                                            isDeepClone
+                                    ));
                                 }
                             }
                         }
@@ -335,7 +364,7 @@ public final class CopyUtil {
     }
 
     /**
-     * list 数据复制
+     * LIST 数据复制
      *
      * @param sourceObject        源数据对象
      * @param targetClass         目标数据类型
@@ -346,8 +375,8 @@ public final class CopyUtil {
      * @return 结果类型的 LIST 对象
      */
     @SuppressWarnings("ALL")
-    public static <E, T> List<T> runList(Iterable<E> sourceObject, Class<T> targetClass,
-                                         List<T> defaultTargetObject, boolean isDeepClone) {
+    public static <E, T> List<T> runList(
+            Iterable<E> sourceObject, Class<T> targetClass, List<T> defaultTargetObject, boolean isDeepClone) {
         try {
             if (sourceObject == null
                     || targetClass == null
@@ -361,14 +390,23 @@ public final class CopyUtil {
                     final Class<?> eSourceClass = eSource.getClass();
                     if (eSourceClass == targetClass) {
                         result.add((T) clone(eSource, isDeepClone));
-                    } else {
-                        if (isSupportSerializable(eSourceClass)
-                                && isSupportSerializable(targetClass)
-                                && !isMapType(eSourceClass)
-                                && !isMapType(targetClass)
-                                && !isIterableType(eSourceClass)
-                                && !isIterableType(targetClass)) {
-                            // &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+                    } else if (isSupportSerializable(targetClass)
+                            && isSupportSerializable(eSourceClass)
+                            && !isIterableType(targetClass)
+                            && !isIterableType(eSourceClass)
+                    ) {
+                        if (isMapType(eSourceClass)) {
+                            final Map<?, ?> eSourceMap = (Map<?, ?>) eSource;
+                            final T targetData = targetClass.getDeclaredConstructor().newInstance();
+                            if (!eSourceMap.isEmpty()) {
+                                for (final Object key : eSourceMap.keySet()) {
+                                    if (key instanceof String keyString) {
+                                        runMapKeyValue(keyString, eSourceMap.get(key), targetData, isDeepClone);
+                                    }
+                                }
+                            }
+                            result.add(targetData);
+                        } else {
                             result.add(run(eSource, targetClass, null, isDeepClone));
                         }
                     }
@@ -380,43 +418,181 @@ public final class CopyUtil {
         }
     }
 
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject 源数据对象
+     * @param <V>          数据类型
+     * @param <T>          转换的目标泛型
+     * @return 目标数据对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, Class<T> targetClass) {
+        return runMap(sourceObject, targetClass, null, false);
+    }
 
-    public static <V> Object runMap(Map<String, V> sourceObject, Object targetObject, Object defaultTargetObject, boolean isDeepClone) {
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject 源数据对象
+     * @param targetClass  目标数据类型
+     * @param isDeepClone  是否深度复制
+     * @param <V>          数据类型
+     * @param <T>          转换的目标泛型
+     * @return 目标数据对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, Class<T> targetClass, boolean isDeepClone) {
+        return runMap(sourceObject, targetClass, null, isDeepClone);
+    }
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject        源数据对象
+     * @param targetClass         目标数据类型
+     * @param defaultTargetObject 默认目标数据对象
+     * @param <V>                 数据类型
+     * @param <T>                 转换的目标泛型
+     * @return 目标数据对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, Class<T> targetClass, T defaultTargetObject) {
+        return runMap(sourceObject, targetClass, defaultTargetObject, false);
+    }
+
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject        源数据对象
+     * @param targetClass         目标数据类型
+     * @param defaultTargetObject 默认目标数据对象
+     * @param isDeepClone         是否深度复制
+     * @param <V>                 数据类型
+     * @param <T>                 转换的目标泛型
+     * @return 目标数据对象
+     */
+    public static <V, T> T runMap(
+            Map<String, V> sourceObject, Class<T> targetClass, T defaultTargetObject, boolean isDeepClone) {
         try {
-            if (sourceObject == null
-                    || targetObject == null
-                    || !isMapType(sourceObject.getClass())
-                    || isIterableType(targetObject.getClass())) {
-                return clone(defaultTargetObject, isDeepClone);
+            if (sourceObject == null || targetClass == null) {
+                return defaultTargetObject;
             } else {
+                final T targetObject = targetClass.getDeclaredConstructor().newInstance();
+                return runMap(sourceObject, targetObject, defaultTargetObject, isDeepClone);
+            }
+        } catch (Exception e) {
+            return defaultTargetObject;
+        }
+    }
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject 源数据对象
+     * @param targetObject 目标数据对象
+     * @param <V>          数据类型
+     * @param <T>          结果类型
+     * @return 目标数据对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, T targetObject) {
+        return runMap(sourceObject, targetObject, null, false);
+    }
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject 源数据对象
+     * @param targetObject 目标数据对象
+     * @param isDeepClone  是否深度复制
+     * @param <V>          数据类型
+     * @param <T>          结果类型
+     * @return 目标数据对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, T targetObject, boolean isDeepClone) {
+        return runMap(sourceObject, targetObject, null, isDeepClone);
+    }
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject        源数据对象
+     * @param targetObject        目标数据对象
+     * @param defaultTargetObject 默认目标数据对象
+     * @param <V>                 数据类型
+     * @param <T>                 结果类型
+     * @return 结果类型的 LIST 对象
+     */
+    @SuppressWarnings("ALL")
+    public static <V, T> T runMap(Map<String, V> sourceObject, T targetObject, T defaultTargetObject) {
+        return runMap(sourceObject, targetObject, defaultTargetObject, false);
+    }
+
+    /**
+     * MAP 数据复制
+     *
+     * @param sourceObject        源数据对象
+     * @param targetObject        目标数据对象
+     * @param defaultTargetObject 默认目标数据对象
+     * @param isDeepClone         是否深度复制
+     * @param <V>                 数据类型
+     * @param <T>                 结果类型
+     * @return 结果类型的 LIST 对象
+     */
+    public static <V, T> T runMap(
+            Map<String, V> sourceObject, T targetObject, T defaultTargetObject, boolean isDeepClone) {
+        if (sourceObject == null
+                || targetObject == null
+                || !isMapType(sourceObject.getClass())
+                || isMapType(targetObject.getClass())
+                || isIterableType(targetObject.getClass())
+                || !isSupportSerializable(targetObject.getClass())) {
+            return defaultTargetObject;
+        } else {
+            try {
                 final Field[] targetFields = getFields(targetObject.getClass());
                 for (final Field targetField : targetFields) {
-                    final V value = sourceObject.get(targetField.getName());
+                    final String key = targetField.getName();
+                    final V value = sourceObject.get(key);
                     if (value != null) {
-                        targetField.setAccessible(true);
-                        final Class<?> valueClass = value.getClass();
-
-
-                        if (valueClass == targetField.getType()) {
-                            targetField.set(targetObject, clone(value, isDeepClone));
-                        } else {
-                            if (isSupportSerializable(valueClass)
-                                    && isSupportSerializable(targetField.getType())
-                                    && !isMapType(valueClass)
-                                    && !isMapType(targetField.getType())
-                                    && !isIterableType(valueClass)
-                                    && !isIterableType(targetField.getType())) {
-                                targetField.set(targetObject, run(value, targetField.getType(), null, isDeepClone));
-                            }
-                        }
+                        runMapKeyValue(key, value, targetObject, isDeepClone);
                     }
                 }
                 return targetObject;
+            } catch (Exception e) {
+                // ignore
             }
-        } catch (Exception e) {
-            // ignore
         }
-        return clone(defaultTargetObject, isDeepClone);
+        return defaultTargetObject;
+    }
+
+    /**
+     * RUN MAP ITEM 复制
+     *
+     * @param key         源 KEY 名词
+     * @param value       源 VALUE 内容
+     * @param data        目标数据对象
+     * @param isDeepClone 是否深度复制
+     */
+    private static void runMapKeyValue(String key, Object value, Object data, boolean isDeepClone) {
+        if (value != null
+                && !(value instanceof Map)
+                && !(value instanceof Iterable)) {
+            try {
+                final Field field = data.getClass().getDeclaredField(key);
+                field.setAccessible(true);
+                if (value.getClass() == field.getType()) {
+                    field.set(data, clone(value, isDeepClone));
+                } else {
+                    field.set(data, run(value, field.getType(), null, isDeepClone));
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+        }
     }
 
     /**
@@ -438,7 +614,7 @@ public final class CopyUtil {
      * @return 转换的对象
      */
     @SuppressWarnings("ALL")
-    public static Map<String, ?> toMap(Object sourceObject, Map<String, Object> defaultTargetObject) {
+    public static Map<String, ?> toMap(Object sourceObject, Map<String, ?> defaultTargetObject) {
         return toMap(sourceObject, defaultTargetObject, false);
     }
 
@@ -462,67 +638,66 @@ public final class CopyUtil {
      * @param isDeepClone         是否深度复制
      * @return 转换的对象
      */
-    @SuppressWarnings("ALL")
-    public static Map<String, Object> toMap(
-            Object sourceObject, Map<String, Object> defaultTargetObject, boolean isDeepClone) {
-        if (sourceObject == null || isIterableType(sourceObject.getClass())) {
-            return defaultTargetObject;
-        } else {
+    public static Map<String, ?> toMap(Object sourceObject, Map<String, ?> defaultTargetObject, boolean isDeepClone) {
+        if (sourceObject != null
+                && !isIterableType(sourceObject.getClass())
+                && !isSupportSerializable(sourceObject.getClass())) {
             try {
                 final Class<?> sourceClass = sourceObject.getClass();
-                if (isSupportSerializable(sourceClass)) {
-                    final Map<String, Object> result;
-                    if (isMapType(sourceClass)) {
-                        final Map<Object, Object> sourceMap = (Map<Object, Object>) sourceObject;
-                        result = new HashMap<>(sourceMap.size());
-                        for (final Object key : sourceMap.keySet()) {
-                            if (isBaseType(key.getClass())) {
-                                final Object value = sourceMap.get(key);
-                                if (isBaseType(value.getClass())) {
-                                    result.put(String.valueOf(clone(key, isDeepClone)), clone(value, isDeepClone));
-                                } else {
-                                    if (isIterableType(value.getClass())) {
-                                        result.put(
-                                                String.valueOf(clone(key, isDeepClone)),
-                                                toList(value, null, isDeepClone)
-                                        );
-                                    } else {
-                                        result.put(
-                                                String.valueOf(clone(key, isDeepClone)),
-                                                toMap(value, null, isDeepClone)
-                                        );
-                                    }
-                                }
-                            }
-                        }
-                    } else {
-                        final Field[] sourceFields = getFields(sourceClass);
-                        result = new HashMap<>(sourceFields.length);
-                        for (Field sourceField : sourceFields) {
-                            sourceField.setAccessible(true);
-                            final Object sourceFieldObject = sourceField.get(sourceObject);
-                            final Class<?> sourceFieldClass = sourceField.getType();
-                            if (isBaseType(sourceFieldClass)) {
-                                result.put(sourceField.getName(),
-                                        clone(sourceFieldObject, isDeepClone));
+                final Map<String, Object> result;
+                if (isMapType(sourceClass)) {
+                    final Map<?, ?> sourceMap = (Map<?, ?>) sourceObject;
+                    result = new HashMap<>(sourceMap.size());
+                    for (final Object key : sourceMap.keySet()) {
+                        if (isBaseType(key.getClass())) {
+                            final Object value = sourceMap.get(key);
+                            if (isBaseType(value.getClass())) {
+                                result.put(String.valueOf(clone(key, isDeepClone)), clone(value, isDeepClone));
                             } else {
-                                if (isIterableType(sourceFieldClass)) {
-                                    result.put(sourceField.getName(),
-                                            toList(sourceFieldObject, null, isDeepClone));
+                                if (isIterableType(value.getClass())) {
+                                    result.put(
+                                            String.valueOf(clone(key, isDeepClone)),
+                                            toList(value, null, isDeepClone)
+                                    );
                                 } else {
-                                    result.put(sourceField.getName(),
-                                            toMap(sourceFieldObject, null, isDeepClone));
+                                    result.put(
+                                            String.valueOf(clone(key, isDeepClone)),
+                                            toMap(value, null, isDeepClone)
+                                    );
                                 }
                             }
                         }
                     }
-                    return result;
+                } else {
+                    final Field[] sourceFields = getFields(sourceClass);
+                    result = new HashMap<>(sourceFields.length);
+                    for (Field sourceField : sourceFields) {
+                        sourceField.setAccessible(true);
+                        final Object sourceFieldObject = sourceField.get(sourceObject);
+                        final Class<?> sourceFieldClass = sourceField.getType();
+                        if (isBaseType(sourceFieldClass)) {
+                            result.put(sourceField.getName(), clone(sourceFieldObject, isDeepClone));
+                        } else {
+                            if (isIterableType(sourceFieldClass)) {
+                                result.put(
+                                        sourceField.getName(),
+                                        toList(sourceFieldObject, null, isDeepClone)
+                                );
+                            } else {
+                                result.put(
+                                        sourceField.getName(),
+                                        toMap(sourceFieldObject, null, isDeepClone)
+                                );
+                            }
+                        }
+                    }
                 }
+                return result;
             } catch (Exception e) {
                 // ignore
             }
-            return defaultTargetObject;
         }
+        return defaultTargetObject;
     }
 
     /**
@@ -761,25 +936,9 @@ public final class CopyUtil {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
             // ignore
         }
         return result;
-    }
-
-    public static void main(String[] args) {
-        try {
-            System.out.println(
-                    getFieldGenericClass(A.class.getDeclaredField("a"))
-            );
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    public static class A {
-        private Map<String, String> a = new HashMap<>();
     }
 
     /**
