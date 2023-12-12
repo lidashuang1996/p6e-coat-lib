@@ -1,7 +1,9 @@
 package club.p6e.coat.common.error;
 
-import java.util.HashMap;
+import lombok.Getter;
+
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 自定义异常
@@ -9,12 +11,14 @@ import java.util.Map;
  * @author lidashuang
  * @version 1.0
  */
+@Getter
 public abstract class CustomException extends RuntimeException {
 
     /**
      * 转型器缓存
      */
-    private static final Map<Class<? extends Exception>, CustomException> TRANSFORMER_CACHE = new HashMap<>();
+    private static final Map<Class<? extends Exception>,
+            CustomException> TRANSFORMER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 代码
@@ -27,12 +31,17 @@ public abstract class CustomException extends RuntimeException {
     private final String sketch;
 
     /**
+     * 内容
+     */
+    private final String content;
+
+    /**
      * 转换
      *
      * @param exception 异常对象
      * @return 异常对象
      */
-    public static Exception transformation(Exception exception) {
+    public static Throwable transformation(Throwable exception) {
         final CustomException customException = TRANSFORMER_CACHE.get(exception.getClass());
         return customException == null ? exception : customException;
     }
@@ -57,8 +66,9 @@ public abstract class CustomException extends RuntimeException {
      * @param sketch  简述
      * @return 模版的输出内容
      */
-    private static String template(Class<?> sc, Class<? extends CustomException> ec, String content, int code, String sketch) {
-        return "{ " + sketch + " <" + code + "> } ::: [ " + sc + " ] => (" + ec + ") ===> " + content;
+    private static String template(Class<?> sc, Class<? extends CustomException> ec,
+                                   String error, int code, String sketch, String content) {
+        return "{ " + sketch + " <" + code + "> [" + content + "] } ::: [ " + sc + " ] => (" + ec + ") ===> " + error;
     }
 
     /**
@@ -66,14 +76,17 @@ public abstract class CustomException extends RuntimeException {
      *
      * @param sc      源 class
      * @param ec      异常 class
-     * @param content 错误的描述
+     * @param error   错误的描述
      * @param code    代码
      * @param sketch  简述
+     * @param content 内容
      */
-    public CustomException(Class<?> sc, Class<? extends CustomException> ec, String content, int code, String sketch) {
-        super(template(sc, ec, content, code, sketch));
+    public CustomException(Class<?> sc, Class<? extends CustomException> ec,
+                           String error, int code, String sketch, String content) {
+        super(template(sc, ec, error, code, sketch, content));
         this.code = code;
         this.sketch = sketch;
+        this.content = content;
     }
 
     /**
@@ -84,28 +97,14 @@ public abstract class CustomException extends RuntimeException {
      * @param throwable 异常对象
      * @param code      代码
      * @param sketch    简述
+     * @param content   内容
      */
-    public CustomException(Class<?> sc, Class<? extends CustomException> ec, Throwable throwable, int code, String sketch) {
-        super(template(sc, ec, throwable.getMessage(), code, sketch), throwable);
+    public CustomException(Class<?> sc, Class<? extends CustomException> ec,
+                           Throwable throwable, int code, String sketch, String content) {
+        super(template(sc, ec, throwable.getMessage(), code, sketch, content), throwable);
         this.code = code;
         this.sketch = sketch;
+        this.content = content;
     }
 
-    /**
-     * 获取代码
-     *
-     * @return 代码内容
-     */
-    public int getCode() {
-        return code;
-    }
-
-    /**
-     * 获取简述
-     *
-     * @return 简述内容
-     */
-    public String getSketch() {
-        return sketch;
-    }
 }

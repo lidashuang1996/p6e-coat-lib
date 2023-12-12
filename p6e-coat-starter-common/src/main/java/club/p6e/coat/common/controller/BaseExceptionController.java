@@ -35,8 +35,8 @@ public class BaseExceptionController {
     @ExceptionHandler(value = Exception.class)
     public Object errorHandler(Exception exception) {
         LOGGER.error(exception.getMessage());
-        exception = CustomException.transformation(exception);
-        if (exception instanceof CustomException) {
+        final Throwable throwable = CustomException.transformation(exception);
+        if (throwable instanceof CustomException) {
             final CustomException customException = (CustomException) exception;
             return this.isServletRequest()
                     ? ResultContext.build(customException.getCode(), customException.getSketch(), "")

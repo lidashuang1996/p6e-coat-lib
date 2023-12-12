@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,6 +48,16 @@ public final class JsonUtil {
          * @return 对象
          */
         public <T> T fromJson(InputStream inputStream, Class<T> tClass);
+
+        /**
+         * 反序列化 JSON 到对象
+         *
+         * @param json   json 内容
+         * @param iClass key 对象类型
+         * @param <I>    key 对象类型
+         * @return 对象
+         */
+        public <I> List<I> fromJsonToList(String json, Class<I> iClass);
 
         /**
          * 反序列化 JSON 到对象
@@ -103,6 +114,15 @@ public final class JsonUtil {
         public <T> T fromJson(InputStream inputStream, Class<T> tClass) {
             try {
                 return om.readValue(inputStream, tClass);
+            } catch (Exception e) {
+                return null;
+            }
+        }
+
+        @Override
+        public <I> List<I> fromJsonToList(String json, Class<I> iClass) {
+            try {
+                return om.readValue(json, om.getTypeFactory().constructParametricType(List.class, iClass));
             } catch (Exception e) {
                 return null;
             }
@@ -179,6 +199,10 @@ public final class JsonUtil {
      */
     public static <K, V> Map<K, V> fromJsonToMap(String json, Class<K> kClass, Class<V> vClass) {
         return DEFINITION.fromJsonToMap(json, kClass, vClass);
+    }
+
+    public static <I> List<I> fromJsonToList(String json, Class<I> iClass) {
+        return DEFINITION.fromJsonToList(json, iClass);
     }
 
 }

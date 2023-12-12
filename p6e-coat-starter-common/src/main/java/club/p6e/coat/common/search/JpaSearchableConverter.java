@@ -11,7 +11,7 @@ import java.util.List;
  * @author lidashuang
  * @version 1.0
  */
-public class SearchableConverter {
+public class JpaSearchableConverter {
 
     public static Predicate to(SearchableContext<?> context, Root<?> rt, CriteriaBuilder cb) {
         return to(context, rt, cb, null);
@@ -49,11 +49,7 @@ public class SearchableConverter {
             }
             if (SearchableContext.RIGHT_TYPE.equals(option.getType())) {
                 if (searchable == null) {
-                    throw GlobalExceptionContext.executeParameterException(
-                            SearchableConverter.class,
-                            "fun execute(SearchableContext<?> context, Root<?> rt, CriteriaBuilder cb).",
-                            "Unexpected end symbol exception."
-                    );
+                    return null;
                 } else {
                     hierarchy--;
                     if (hierarchy == 0) {

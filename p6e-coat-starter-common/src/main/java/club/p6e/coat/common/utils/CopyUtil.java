@@ -172,17 +172,36 @@ public final class CopyUtil {
                                             && !targetFieldGeneric.isEmpty()
                                             && sourceFieldGeneric.get(0).size() == 1
                                             && targetFieldGeneric.get(0).size() == 1
-                                            && !isMapType(sourceFieldGeneric.get(0).get(0))
-                                            && !isMapType(targetFieldGeneric.get(0).get(0))
-                                            && !isIterableType(sourceFieldGeneric.get(0).get(0))
-                                            && !isIterableType(targetFieldGeneric.get(0).get(0))
                                             && isSupportSerializable(sourceFieldGeneric.get(0).get(0))
                                             && isSupportSerializable(targetFieldGeneric.get(0).get(0))) {
                                         final List<Object> targetFieldDataIterable = new ArrayList<>();
                                         final Iterable<?> sourceFieldDataIterable = (Iterable<?>) sourceFieldData;
                                         for (final Object item : sourceFieldDataIterable) {
                                             Object targetFieldDataIterableItem = null;
-                                            if (item != null) {
+                                            if (sourceFieldGeneric.size() > 1
+                                                    && targetFieldGeneric.size() > 1
+                                                    && isMapType(sourceFieldGeneric.get(0).get(0))
+                                                    && isMapType(targetFieldGeneric.get(0).get(0))
+                                                    && sourceFieldGeneric.get(1).size() == 2
+                                                    && targetFieldGeneric.get(1).size() == 2
+                                                    && isBaseType(sourceFieldGeneric.get(1).get(0))
+                                                    && isBaseType(targetFieldGeneric.get(1).get(0))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)
+                                                    && isIterableType(sourceFieldGeneric.get(1).get(1))
+                                                    && isIterableType(targetFieldGeneric.get(1).get(1))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)) {
+                                                targetFieldDataIterableItem = clone(item, isDeepClone);
+                                            } else if (sourceFieldGeneric.size() > 1
+                                                    && targetFieldGeneric.size() > 1
+                                                    && isIterableType(sourceFieldGeneric.get(0).get(0))
+                                                    && isIterableType(targetFieldGeneric.get(0).get(0))
+                                                    && sourceFieldGeneric.get(1).size() == 1
+                                                    && targetFieldGeneric.get(1).size() == 1
+                                                    && isIterableType(sourceFieldGeneric.get(1).get(0))
+                                                    && isIterableType(targetFieldGeneric.get(1).get(0))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)) {
+                                                targetFieldDataIterableItem = clone(item, isDeepClone);
+                                            } else if (item != null) {
                                                 if (sourceFieldGeneric.get(0).get(0)
                                                         != targetFieldGeneric.get(0).get(0)) {
                                                     targetFieldDataIterableItem = run(
@@ -208,18 +227,12 @@ public final class CopyUtil {
                                             && !targetFieldGeneric.isEmpty()
                                             && sourceFieldGeneric.get(0).size() == 2
                                             && targetFieldGeneric.get(0).size() == 2
-                                            && !isMapType(sourceFieldGeneric.get(0).get(0))
-                                            && !isMapType(targetFieldGeneric.get(0).get(0))
-                                            && !isMapType(sourceFieldGeneric.get(0).get(1))
-                                            && !isMapType(targetFieldGeneric.get(0).get(1))
-                                            && !isIterableType(sourceFieldGeneric.get(0).get(0))
-                                            && !isIterableType(targetFieldGeneric.get(0).get(0))
-                                            && !isIterableType(sourceFieldGeneric.get(0).get(1))
-                                            && !isIterableType(targetFieldGeneric.get(0).get(1))
-                                            && isSupportSerializable(sourceFieldGeneric.get(0).get(0))
-                                            && isSupportSerializable(targetFieldGeneric.get(0).get(0))
+                                            && isBaseType(sourceFieldGeneric.get(0).get(0))
+                                            && isBaseType(targetFieldGeneric.get(0).get(0))
+                                            && sourceFieldGeneric.get(0).get(0) == targetFieldGeneric.get(0).get(0)
                                             && isSupportSerializable(sourceFieldGeneric.get(0).get(1))
-                                            && isSupportSerializable(targetFieldGeneric.get(0).get(1))) {
+                                            && isSupportSerializable(targetFieldGeneric.get(0).get(1))
+                                            && sourceFieldGeneric.get(0).get(1) == targetFieldGeneric.get(0).get(1)) {
                                         final Map<Object, Object> targetFieldDataMap = new HashMap<>();
                                         final Map<?, ?> sourceFieldDataMap = (Map<?, ?>) sourceFieldData;
                                         for (final Object key : sourceFieldDataMap.keySet()) {
@@ -238,9 +251,32 @@ public final class CopyUtil {
                                             }
                                             final Object value = sourceFieldDataMap.get(key);
                                             Object targetFieldDataMapValue = null;
-                                            if (value != null) {
+                                            if (sourceFieldGeneric.size() > 1
+                                                    && targetFieldGeneric.size() > 1
+                                                    && isMapType(sourceFieldGeneric.get(0).get(1))
+                                                    && isMapType(targetFieldGeneric.get(0).get(1))
+                                                    && sourceFieldGeneric.get(1).size() == 2
+                                                    && targetFieldGeneric.get(1).size() == 2
+                                                    && isBaseType(sourceFieldGeneric.get(1).get(0))
+                                                    && isBaseType(targetFieldGeneric.get(1).get(0))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)
+                                                    && isIterableType(sourceFieldGeneric.get(1).get(1))
+                                                    && isIterableType(targetFieldGeneric.get(1).get(1))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)) {
+                                                targetFieldDataMapValue = clone(value, isDeepClone);
+                                            } else if (sourceFieldGeneric.size() > 1
+                                                    && targetFieldGeneric.size() > 1
+                                                    && isIterableType(sourceFieldGeneric.get(0).get(1))
+                                                    && isIterableType(targetFieldGeneric.get(0).get(1))
+                                                    && sourceFieldGeneric.get(1).size() == 1
+                                                    && targetFieldGeneric.get(1).size() == 1
+                                                    && isIterableType(sourceFieldGeneric.get(1).get(0))
+                                                    && isIterableType(targetFieldGeneric.get(1).get(0))
+                                                    && sourceFieldGeneric.get(1).get(0) == targetFieldGeneric.get(1).get(0)) {
+                                                targetFieldDataMapValue = clone(value, isDeepClone);
+                                            } else if (value != null) {
                                                 if (sourceFieldGeneric.get(0).get(1) == targetFieldGeneric.get(0).get(1)) {
-                                                    targetFieldDataMapValue = clone(key, isDeepClone);
+                                                    targetFieldDataMapValue = clone(value, isDeepClone);
                                                 } else {
                                                     targetFieldDataMapValue = run(
                                                             value,
@@ -641,7 +677,7 @@ public final class CopyUtil {
     public static Map<String, ?> toMap(Object sourceObject, Map<String, ?> defaultTargetObject, boolean isDeepClone) {
         if (sourceObject != null
                 && !isIterableType(sourceObject.getClass())
-                && !isSupportSerializable(sourceObject.getClass())) {
+                && isSupportSerializable(sourceObject.getClass())) {
             try {
                 final Class<?> sourceClass = sourceObject.getClass();
                 final Map<String, Object> result;
@@ -846,6 +882,9 @@ public final class CopyUtil {
      */
     private static boolean isSupportSerializable(Class<?> clazz) {
         final Class<?>[] cls = clazz.getInterfaces();
+        if (clazz == Map.class || clazz == List.class) {
+            return true;
+        }
         for (final Class<?> item : cls) {
             if (item == Serializable.class) {
                 return true;
@@ -900,7 +939,6 @@ public final class CopyUtil {
             int index = -1;
             StringBuilder content = null;
             final String typeName = field.getGenericType().getTypeName();
-            System.out.println("typeName >>> " + typeName);
             for (int i = 0; i < typeName.length(); i++) {
                 final char ch = typeName.charAt(i);
                 if (ch == '<') {
@@ -921,7 +959,6 @@ public final class CopyUtil {
                     }
                     content = new StringBuilder();
                     index -= 1;
-                    System.out.println(ch + "  - " + result);
                 } else if (ch == ',' && content != null) {
                     if (index >= result.size()) {
                         result.add(new ArrayList<>());
@@ -930,7 +967,6 @@ public final class CopyUtil {
                         result.get(index).add(Class.forName(content.toString().trim()));
                     }
                     content = new StringBuilder();
-                    System.out.println(ch + "  - " + result);
                 } else if (content != null) {
                     content.append(ch);
                 }

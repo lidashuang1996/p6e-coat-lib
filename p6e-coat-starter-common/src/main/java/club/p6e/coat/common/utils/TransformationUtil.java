@@ -4,6 +4,8 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 转换帮助类
@@ -66,6 +68,32 @@ public final class TransformationUtil {
             return null;
         } else {
             return date.toLocalDate();
+        }
+    }
+
+    public static Boolean objectToBoolean(Object o) {
+        if (o == null) {
+            return null;
+        } else {
+            return String.valueOf(o).equalsIgnoreCase("true");
+        }
+    }
+
+    @SuppressWarnings("ALL")
+    public static Map<String, Object> objectToMap(Object o) {
+        if (o == null) {
+            return null;
+        } else {
+            return (Map<String, Object>) o;
+        }
+    }
+
+    @SuppressWarnings("ALL")
+    public static List<Object> objectToList(Object o) {
+        if (o == null) {
+            return null;
+        } else {
+            return (List<Object>) o;
         }
     }
 }
