@@ -188,6 +188,15 @@ public class PropertiesUtil {
         return (data == null || data.isEmpty()) ? def : data;
     }
 
+    public static List<Object> getListObjectProperty(Properties properties, String name) {
+        return getListProperty(properties, name);
+    }
+
+    public static List<Object> getListObjectProperty(Properties properties, String name, List<Object> def) {
+        final List<Object> data = getListObjectProperty(properties, name);
+        return (data == null || data.isEmpty()) ? def : data;
+    }
+
     public static List<Properties> getListPropertiesProperty(Properties properties, String name) {
         return getListProperty(properties, name)
                 .stream()

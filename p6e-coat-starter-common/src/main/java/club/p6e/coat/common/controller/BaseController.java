@@ -18,6 +18,8 @@ class BaseController {
     protected static final String ACCESS_TOKEN_PARAM2 = "access_token";
     protected static final String REFRESH_TOKEN_PARAM1 = "refreshToken";
     protected static final String REFRESH_TOKEN_PARAM2 = "refresh_token";
+    protected static final String COOKIE_ACCESS_TOKEN_PARAM = "ACCESS_TOKEN";
+    protected static final String COOKIE_REFRESH_TOKEN_PARAM = "REFRESH_TOKEN";
     protected static final String CONTENT_DISPOSITION_ATTACHMENT = "attachment";
 
     /**
