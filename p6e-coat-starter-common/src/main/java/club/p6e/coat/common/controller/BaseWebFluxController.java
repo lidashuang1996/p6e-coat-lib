@@ -7,8 +7,6 @@ import org.springframework.web.server.ServerWebExchange;
 import java.util.List;
 
 /**
- * BaseWebFluxController
- *
  * @author lidashuang
  * @version 1.0
  */
@@ -31,12 +29,14 @@ public class BaseWebFluxController extends BaseController {
      * @return ACCESS TOKEN 内容
      */
     public static String getAccessToken(ServerHttpRequest request) {
-        String accessToken = getParamToken(request, ACCESS_TOKEN_PARAM1, ACCESS_TOKEN_PARAM2);
+        String accessToken = getParam(request, ACCESS_TOKEN_PARAM1, ACCESS_TOKEN_PARAM2, ACCESS_TOKEN_PARAM3);
         if (accessToken == null) {
-            return getHeaderToken(request);
-        } else {
-            return accessToken;
+            accessToken = getHeaderToken(request);
         }
+        if (accessToken == null) {
+            accessToken = getCookieRefreshToken(request);
+        }
+        return accessToken;
     }
 
     /**
@@ -56,16 +56,20 @@ public class BaseWebFluxController extends BaseController {
      * @return REFRESH TOKEN 内容
      */
     public static String getRefreshToken(ServerHttpRequest request) {
-        return getParamToken(request, REFRESH_TOKEN_PARAM1, REFRESH_TOKEN_PARAM2);
+        String refreshToken = getParam(request, REFRESH_TOKEN_PARAM1, REFRESH_TOKEN_PARAM2, REFRESH_TOKEN_PARAM3);
+        if (refreshToken == null) {
+            refreshToken = getCookieAccessToken(request);
+        }
+        return refreshToken;
     }
 
     /**
-     * 通过多个参数名称去获取 url 路径上面的参数值
+     * 通过多个参数名称去获取 URL 路径上面的参数值
      *
      * @param params 参数名称
      * @return 读取的参数名称对应的值
      */
-    public static String getParamToken(ServerHttpRequest request, String... params) {
+    public static String getParam(ServerHttpRequest request, String... params) {
         String value;
         for (String param : params) {
             value = request.getQueryParams().getFirst(param);
@@ -77,12 +81,28 @@ public class BaseWebFluxController extends BaseController {
     }
 
     /**
+     * 获取请求头部的信息
+     *
+     * @return 请求头部的信息
+     */
+    public static String getHeader(ServerHttpRequest request, String name) {
+        if (name != null) {
+            for (final String key : request.getHeaders().keySet()) {
+                if (name.equalsIgnoreCase(key)) {
+                    return request.getHeaders().getFirst(key);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
      * 获取请求头部存在的 TOKEN 信息
      *
      * @return 头部的 TOKEN 信息
      */
     public static String getHeaderToken(ServerHttpRequest request) {
-        final String requestHeaderContent = request.getHeaders().getFirst(AUTH_HEADER);
+        final String requestHeaderContent = getHeader(request, AUTH_HEADER);
         if (requestHeaderContent != null
                 && requestHeaderContent.startsWith(AUTH_HEADER_TOKEN_PREFIX)) {
             return requestHeaderContent.substring(AUTH_HEADER_TOKEN_PREFIX.length());
@@ -91,21 +111,21 @@ public class BaseWebFluxController extends BaseController {
     }
 
     /**
-     * 获取 cookie 的 TOKEN 信息
+     * 获取 COOKIE 的信息
      *
-     * @return cookie 的 ACCESS TOKEN 信息
+     * @return COOKIE 的信息
      */
     public static List<HttpCookie> getCookie(ServerHttpRequest request, String name) {
         return request.getCookies().get(name);
     }
 
     /**
-     * 获取 cookie 的 TOKEN 信息
+     * 获取 COOKIE 的 TOKEN 信息
      *
-     * @return cookie 的 ACCESS TOKEN 信息
+     * @return COOKIE 的 ACCESS TOKEN 信息
      */
     public static String getCookieAccessToken(ServerHttpRequest request) {
-        final List<HttpCookie> cookies = getCookie(request, COOKIE_ACCESS_TOKEN_PARAM);
+        final List<HttpCookie> cookies = getCookie(request, COOKIE_ACCESS_TOKEN);
         if (cookies != null && !cookies.isEmpty()) {
             return cookies.get(0).getValue();
         }
@@ -113,12 +133,12 @@ public class BaseWebFluxController extends BaseController {
     }
 
     /**
-     * 获取 cookie 的 TOKEN 信息
+     * 获取 COOKIE 的 TOKEN 信息
      *
-     * @return cookie 的 REFRESH TOKEN 信息
+     * @return COOKIE 的 REFRESH TOKEN 信息
      */
     public static String getCookieRefreshToken(ServerHttpRequest request) {
-        final List<HttpCookie> cookies = getCookie(request, COOKIE_REFRESH_TOKEN_PARAM);
+        final List<HttpCookie> cookies = getCookie(request, COOKIE_REFRESH_TOKEN);
         if (cookies != null && !cookies.isEmpty()) {
             return cookies.get(0).getValue();
         }
