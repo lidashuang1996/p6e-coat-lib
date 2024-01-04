@@ -48,7 +48,7 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
     /**
      * AES 升序排列
      */
-    public static final String AES = "AES";
+    public static final String ASC = "ASC";
 
     /**
      * DESC 降序排列
@@ -105,8 +105,7 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
         if (clazz == null || context == null) {
             return false;
         } else {
-            final List<Mapper> mappers = extractMappings(clazz);
-            if (validationOptionsToMappings(context, mappers)) {
+            if (validationOptionsToMappings(context, extractMappings(clazz))) {
                 context.validation = true;
                 return true;
             } else {
@@ -137,7 +136,7 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
                 }
                 if (StringUtils.hasText(condition)) {
                     condition = condition.toUpperCase();
-                    condition = condition.equals(DESC) ? DESC : AES;
+                    condition = condition.equals(DESC) ? DESC : ASC;
                 } else {
                     return false;
                 }

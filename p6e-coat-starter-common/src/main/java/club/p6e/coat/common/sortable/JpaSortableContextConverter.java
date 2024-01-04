@@ -1,7 +1,13 @@
 package club.p6e.coat.common.sortable;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Sort;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lidashuang
@@ -9,25 +15,59 @@ import org.springframework.data.domain.Sort;
  */
 public class JpaSortableContextConverter {
 
-    public static void to(CriteriaQuery<?> query, SortableContext context) {
-        to(query, context, null);
+    public static Sort toSort(SortableContext context) {
+        return toSort(context, null);
     }
 
-    public static void to(CriteriaQuery<?> query, SortableContext context, Sort sort) {
-        execute(query, context, sort);
+    public static Sort toSort(SortableContext context, Sort sort) {
+        return execute(context, sort);
     }
 
-    private static void execute(CriteriaQuery<?> query, SortableContext context, Sort sort) {
-        if (sort == null) {
-            query.orderBy(to(context));
-        } else {
-            query.orderBy(to(context).and(sort));
+    public static void injectSort(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SortableContext context) {
+        injectSort(root, query, builder, context, null);
+    }
+
+    public static void injectSort(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SortableContext context, Sort sort) {
+        execute(root, query, builder, context, sort);
+    }
+
+    private static Sort execute(SortableContext context, Sort sort) {
+        final List<Sort.Order> orders = new ArrayList<>();
+        for (final SortableAbstract.Option option : context) {
+            if (SortableAbstract.ASC.equals(option.getCondition())) {
+                orders.add(Sort.Order.asc(option.getContent()));
+            }
+            if (SortableAbstract.DESC.equals(option.getCondition())) {
+                orders.add(Sort.Order.desc(option.getContent()));
+            }
         }
+        if (orders.isEmpty()) {
+            return sort;
+        } else {
+            return Sort.by(orders);
+        }
+    }
 
-        return Sort.by(context.stream().map(i ->
-                SortableAbstract.DESC.equals(i.getCondition())
-                        ? Sort.Order.desc(i.getContent()) : Sort.Order.asc(i.getContent())
-        ).toList());
+    private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SortableContext context, Sort sort) {
+        final List<Order> orders = new ArrayList<>();
+        for (final SortableAbstract.Option option : context) {
+            if (SortableAbstract.ASC.equals(option.getCondition())) {
+                orders.add(builder.asc(root.get(option.getContent())));
+            }
+            if (SortableAbstract.DESC.equals(option.getCondition())) {
+                orders.add(builder.desc(root.get(option.getContent())));
+            }
+        }
+        if (orders.isEmpty()) {
+            for (final Sort.Order order : sort) {
+                if (order.isAscending()) {
+                    orders.add(builder.asc(root.get(order.getProperty())));
+                } else {
+                    orders.add(builder.desc(root.get(order.getProperty())));
+                }
+            }
+        }
+        query.orderBy(orders);
     }
 
 }
