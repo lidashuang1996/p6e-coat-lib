@@ -1,32 +1,33 @@
 package club.p6e.coat.common.sortable;
 
+import jakarta.persistence.criteria.CriteriaQuery;
 import org.springframework.data.domain.Sort;
-
-import java.io.Serializable;
 
 /**
  * @author lidashuang
  * @version 1.0
  */
-public class JpaSortableContextConverter implements Serializable {
+public class JpaSortableContextConverter {
 
-    public static Sort to(SortableContext<?> context) {
-        return to(context, null);
+    public static void to(CriteriaQuery<?> query, SortableContext context) {
+        to(query, context, null);
     }
 
-    public static Sort to(SortableContext<?> context, Sort def) {
-        return execute(context, def);
+    public static void to(CriteriaQuery<?> query, SortableContext context, Sort sort) {
+        execute(query, context, sort);
     }
 
-    private static Sort execute(SortableContext<?> context, Sort def) {
-        if (context == null) {
-            return def;
+    private static void execute(CriteriaQuery<?> query, SortableContext context, Sort sort) {
+        if (sort == null) {
+            query.orderBy(to(context));
         } else {
-            return Sort.by(context.stream().map(i ->
-                    SortableContext.DESC.equals(i.getCondition())
-                            ? Sort.Order.desc(i.getContent()) : Sort.Order.asc(i.getContent())
-            ).toList());
+            query.orderBy(to(context).and(sort));
         }
+
+        return Sort.by(context.stream().map(i ->
+                SortableAbstract.DESC.equals(i.getCondition())
+                        ? Sort.Order.desc(i.getContent()) : Sort.Order.asc(i.getContent())
+        ).toList());
     }
 
 }

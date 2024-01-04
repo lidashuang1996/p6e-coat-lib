@@ -2,9 +2,9 @@ package club.p6e.coat.common.controller.filter;
 
 import club.p6e.coat.common.Properties;
 import club.p6e.coat.common.context.ResultContext;
+import club.p6e.coat.common.controller.BaseWebController;
 import club.p6e.coat.common.utils.JsonUtil;
 import jakarta.servlet.*;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
 
 /**
  * 凭证认证过滤器
@@ -36,7 +35,8 @@ public class VoucherWebFilter implements Filter {
     /**
      * 错误结果对象
      */
-    private static final ResultContext ERROR_RESULT = ResultContext.build(401, "Unauthorized", "Unauthorized");
+    private static final ResultContext ERROR_RESULT =
+            ResultContext.build(401, "Unauthorized", "Unauthorized");
 
     /**
      * 错误结果文本内容
@@ -64,23 +64,14 @@ public class VoucherWebFilter implements Filter {
      */
     @Override
     public void init(FilterConfig config) {
-        LOGGER.info("Filter [ VoucherFilter ] init complete ... ");
+        LOGGER.info("filter [ " + this.getClass() + " ] init complete ...");
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         final Properties.Security security = properties.getSecurity();
         if (security != null && security.isEnable()) {
-            String voucher = null;
-            final HttpServletRequest request = (HttpServletRequest) servletRequest;
-            final Enumeration<String> headerNames = request.getHeaderNames();
-            while (headerNames.hasMoreElements()) {
-                final String headerName = headerNames.nextElement();
-                if (VOUCHER_HEADER.equalsIgnoreCase(headerName)) {
-                    voucher = request.getHeader(headerName);
-                    break;
-                }
-            }
+            final String voucher = BaseWebController.getHeader(VOUCHER_HEADER);
             if (voucher != null) {
                 for (final String item : security.getVouchers()) {
                     if (item.equalsIgnoreCase(voucher)) {
@@ -90,12 +81,9 @@ public class VoucherWebFilter implements Filter {
                 }
             }
             final HttpServletResponse response = (HttpServletResponse) servletResponse;
-            final String result = JsonUtil.toJson(ERROR_RESULT_CONTENT);
-            if (result != null) {
-                response.setStatus(HttpStatus.UNAUTHORIZED.value());
-                try (final OutputStream outputStream = response.getOutputStream()) {
-                    outputStream.write(result.getBytes(StandardCharsets.UTF_8));
-                }
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            try (final OutputStream output = response.getOutputStream()) {
+                output.write(ERROR_RESULT_CONTENT.getBytes(StandardCharsets.UTF_8));
             }
         } else {
             chain.doFilter(servletRequest, servletResponse);
@@ -107,7 +95,7 @@ public class VoucherWebFilter implements Filter {
      */
     @Override
     public void destroy() {
-        LOGGER.info("Filter [ VoucherFilter ] destroy complete ... ");
+        LOGGER.info("filter [ " + this.getClass() + " ] destroy complete !!");
     }
 
 }

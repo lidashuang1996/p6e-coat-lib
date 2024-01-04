@@ -22,11 +22,6 @@ import java.util.stream.Collectors;
 public class CrossDomainWebFilter implements Filter {
 
     /**
-     * 注入日志系统
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(CrossDomainWebFilter.class);
-
-    /**
      * 分隔符号
      */
     private static final String ACCESS_CONTROL_DELIMITER = ",";
@@ -71,13 +66,18 @@ public class CrossDomainWebFilter implements Filter {
     };
 
     /**
+     * 注入日志系统
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(CrossDomainWebFilter.class);
+
+    /**
      * 初始化过滤器时候的方法回调
      *
      * @param filterConfig 过滤的配置对象
      */
     @Override
     public void init(FilterConfig filterConfig) {
-        LOGGER.info("Filter [ CrossDomainWebFilter ] init complete ... ");
+        LOGGER.info("filter [ " + this.getClass() + " ] init complete ...");
     }
 
     /**
@@ -90,9 +90,7 @@ public class CrossDomainWebFilter implements Filter {
      * @throws ServletException 服务处理时候可能出现的异常
      */
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)
-            throws IOException, ServletException {
-        // 获取请求头和返回头
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         final HttpServletRequest request = (HttpServletRequest) servletRequest;
         final HttpServletResponse response = (HttpServletResponse) servletResponse;
 
@@ -116,14 +114,10 @@ public class CrossDomainWebFilter implements Filter {
         response.setHeader("Access-Control-Allow-Methods",
                 Arrays.stream(ACCESS_CONTROL_ALLOW_METHODS).map(HttpMethod::name).collect(Collectors.joining(ACCESS_CONTROL_DELIMITER)));
 
-        // 是否为 OPTIONS 方法
-        // 如果请求的方法为 options 那么将立即返回数据并设置返回头为 200
-        // 关 HTTP OPTIONS 请求的唯一响应是 200 ，但是有一些情况，例如当内容长度为 0 时，一个 204 会更合适
         if (HttpMethod.OPTIONS.matches(request.getMethod().toUpperCase())) {
-            // 返回 200 或者 204
             response.setStatus(HttpStatus.OK.value());
+            // response.setStatus(HttpStatus.NO_CONTENT.value());
         } else {
-            // 进入内部执行后续的方法
             filterChain.doFilter(servletRequest, servletResponse);
         }
     }
@@ -133,7 +127,7 @@ public class CrossDomainWebFilter implements Filter {
      */
     @Override
     public void destroy() {
-        LOGGER.info("Filter [ CrossDomainWebFilter ] destroy complete ... ");
+        LOGGER.info("filter [ " + this.getClass() + " ] destroy complete !!");
     }
 
 }

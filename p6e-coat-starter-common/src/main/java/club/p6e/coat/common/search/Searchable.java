@@ -12,8 +12,19 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Searchable {
+
+    /**
+     * 搜索的名称
+     *
+     * @return 搜索的名称
+     */
     String name() default "";
 
+    /**
+     * 字段的名称
+     *
+     * @return 字段的名称
+     */
     String column() default "";
 
 }

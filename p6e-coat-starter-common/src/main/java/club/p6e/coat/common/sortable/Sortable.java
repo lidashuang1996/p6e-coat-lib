@@ -13,7 +13,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Sortable {
 
+    /**
+     * 排序的名称
+     *
+     * @return 排序的名称
+     */
     String name() default "";
+
+    /**
+     * 字段的名称
+     *
+     * @return 字段的名称
+     */
     String column() default "";
 
 }

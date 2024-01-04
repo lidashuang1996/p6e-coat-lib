@@ -8,20 +8,13 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
 /**
- * BaseVersionController
- *
  * @author lidashuang
  * @version 1.0
  */
 @RestController
-@RequestMapping("/version")
-@Component(BaseVersionController.BEAN_NAME)
+@RequestMapping("/__version__")
+@Component(value = "club.p6e.coat.common.controller.BaseVersionController")
 public class BaseVersionController extends BaseController {
-
-    /**
-     * 注入的 BEAN 的名称
-     */
-    public static final String BEAN_NAME = "club.p6e.coat.common.controller.BaseVersionController";
 
     /**
      * 配置文件对象
@@ -42,8 +35,8 @@ public class BaseVersionController extends BaseController {
         return def2();
     }
 
+    @SuppressWarnings("ALL")
     @RequestMapping("/")
-    @SuppressWarnings("all")
     public Object def2() {
         try {
             Class.forName("jakarta.servlet.ServletRequest");
