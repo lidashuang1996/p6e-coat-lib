@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,6 +36,11 @@ public class Properties implements Serializable {
     private Security security = new Security();
 
     /**
+     * 安全
+     */
+    private CrossDomain crossDomain = new CrossDomain();
+
+    /**
      * 雪花
      */
     private Map<String, Snowflake> snowflake = new HashMap<>();
@@ -52,6 +58,23 @@ public class Properties implements Serializable {
          */
         private String[] vouchers = new String[]{};
 
+    }
+
+    /**
+     * Cross Domain
+     */
+    @Data
+    @Accessors(chain = true)
+    public static class CrossDomain implements Serializable {
+        /**
+         * 是否启动
+         */
+        private boolean enable = false;
+
+        /**
+         * 白名单
+         */
+        private List<String> whiteList = List.of("*");
     }
 
     @Data

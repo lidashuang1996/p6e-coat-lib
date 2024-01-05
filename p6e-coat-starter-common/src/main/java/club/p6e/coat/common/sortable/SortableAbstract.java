@@ -62,22 +62,12 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
     private boolean validation = false;
 
     /**
-     * 验证参数是否合法
-     *
-     * @param clazz 模型类型
-     * @return 验证情况
-     */
-    public boolean validation(Class<?> clazz) {
-        return validationOptionsToMappings(clazz, this);
-    }
-
-    /**
      * 提取映射数据
      *
      * @param clazz 模型类型
      * @return 映射数据
      */
-    protected List<Mapper> extractMappings(Class<?> clazz) {
+    public static List<Mapper> extractMappings(Class<?> clazz) {
         final List<Mapper> mappers = new ArrayList<>();
         if (clazz != null) {
             final Field[] fields = clazz.getDeclaredFields();
@@ -92,6 +82,16 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
             }
         }
         return mappers;
+    }
+
+    /**
+     * 验证参数是否合法
+     *
+     * @param clazz 模型类型
+     * @return 验证情况
+     */
+    public boolean validation(Class<?> clazz) {
+        return validationOptionsToMappings(clazz, this);
     }
 
     /**

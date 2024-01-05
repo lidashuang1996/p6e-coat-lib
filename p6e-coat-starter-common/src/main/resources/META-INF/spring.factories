@@ -1,8 +1,8 @@
 # Auto Configure
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 club.p6e.coat.common.controller.config.LocalDateTimeConfig,\
-club.p6e.coat.common.controller.BaseExceptionController,\
+club.p6e.coat.common.controller.config.BaseExceptionController,\
 club.p6e.coat.common.controller.BaseVersionController,\
 club.p6e.coat.common.paging.PagingServiceImpl,\
-club.p6e.coat.common.ApplicationListener,\
+club.p6e.coat.common.ApplicationRunner,\
 club.p6e.coat.common.Properties

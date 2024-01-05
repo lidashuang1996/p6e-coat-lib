@@ -1,11 +1,12 @@
 package club.p6e.coat.common;
 
-import club.p6e.coat.common.context.WebResultErrorContent;
+import club.p6e.coat.common.controller.config.WebExecuteErrorConfig;
 import club.p6e.coat.common.utils.SnowflakeIdUtil;
 import club.p6e.coat.common.utils.SpringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,24 +15,24 @@ import org.springframework.stereotype.Component;
  * @author lidashuang
  * @version 1.0
  */
-@Component(ApplicationListener.BEAN_NAME)
-public class ApplicationListener implements
-        org.springframework.context.ApplicationListener<ApplicationReadyEvent> {
-
-    /**
-     * 注入的 BEAN 的名称
-     */
-    public static final String BEAN_NAME = "club.p6e.coat.common.ApplicationListener";
+@Component(value = "club.p6e.coat.common.ApplicationListener")
+public class ApplicationRunner implements CommandLineRunner {
 
     /**
      * 注入日志对象
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationListener.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ApplicationRunner.class);
+
+    private final ApplicationContext context;
+
+    public ApplicationRunner(ApplicationContext context) {
+        this.context = context;
+    }
 
     @Override
-    public void onApplicationEvent(ApplicationReadyEvent event) {
-        SpringUtil.init(event.getApplicationContext());
-        WebResultErrorContent.init();
+    public void run(String... args) {
+        SpringUtil.init(context);
+        WebExecuteErrorConfig.init();
         final Properties properties = SpringUtil.getBean(Properties.class);
         for (final String name : properties.getSnowflake().keySet()) {
             final Properties.Snowflake snowflake = properties.getSnowflake().get(name);

@@ -1,6 +1,5 @@
 package club.p6e.coat.common.search;
 
-import club.p6e.coat.common.sortable.SortableAbstract;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -21,136 +20,90 @@ public class JpaSearchableConverter {
 
     private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context) {
         if (context != null && !context.isEmpty()) {
-            SearchableContext.extractOptions(context);
+            query.where(execute(root, builder, SearchableContext.extractOptions(context)).toArray(new Predicate[0]));
         }
     }
 
-
-    private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, List<Object> list, Predicate predicate, CriteriaBuilder builder) {
-        if (list != null) {
-            Predicate newPredicate = builder.and();
-            for (final Object item : list) {
-                if (item instanceof List<?>) {
-
-                }
-                if (item instanceof SearchableAbstract.Option) {
-                    query.where();
-                }
-            }
-        }
-    }
-
-    private static Predicate execxute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context) {
-        int hierarchy = 0;
-        boolean bool = false;
-        SearchableAbstract<SearchableAbstract.Option> searchable = null;
-        final List<Predicate> predicates = new ArrayList<>();
-        for (final SearchableAbstract.Option option : context) {
-            if (SearchableAbstract.LEFT_TYPE.equals(option.getType())) {
-                hierarchy++;
-                if (searchable == null) {
-                    searchable = new SearchableAbstract<>(option.getRelationship());
-                    if (SearchableAbstract.AND_RELATIONSHIP_TYPE
-                            .equalsIgnoreCase(searchable.getRelationship())) {
-                        bool = true;
-                    }
-                } else {
-                    searchable.add(option);
-                }
-            }
-            if (SearchableAbstract.RIGHT_TYPE.equals(option.getType())) {
-                if (searchable == null) {
-                    return null;
-                } else {
-                    hierarchy--;
-                    if (hierarchy == 0) {
-                        if (!searchable.isEmpty()) {
-                            if (SearchableAbstract.OR_RELATIONSHIP_TYPE
-                                    .equalsIgnoreCase(searchable.getRelationship())) {
-                                predicates.add(execute(searchable, rt, cb));
-                            }
-                            if (SearchableAbstract.AND_RELATIONSHIP_TYPE
-                                    .equalsIgnoreCase(searchable.getRelationship())) {
-                                predicates.add(execute(searchable, rt, cb));
-                            }
-                        }
-                        searchable = null;
-                    } else {
-                        searchable.add(option);
-                    }
-                }
-            }
-            if (SearchableAbstract.CONDITION_TYPE.equals(option.getType())) {
-                if (searchable == null) {
-                    if (SearchableAbstract.OR_RELATIONSHIP_TYPE
-                            .equalsIgnoreCase(option.getRelationship())) {
-                        final Predicate predicate = execute(option, rt, cb);
-                        if (predicate != null) {
-                            predicates.add(predicate);
-                        }
-                    }
-                    if (SearchableAbstract.AND_RELATIONSHIP_TYPE
-                            .equalsIgnoreCase(option.getRelationship())) {
-                        final Predicate predicate = execute(option, rt, cb);
-                        if (predicate != null) {
-                            bool = true;
-                            predicates.add(predicate);
-                        }
-                    }
-                } else {
-                    searchable.add(option);
-                }
-            }
-        }
-        return bool ? cb.and(predicates.toArray(new Predicate[0])) : cb.or(predicates.toArray(new Predicate[0]));
-    }
-
-    private static Predicate execute(SearchableAbstract.Option option, Root<?> rt, CriteriaBuilder cb) {
-        if (option.getKey() == null || option.getCondition() == null) {
-            return null;
+    private static Predicate execute(Root<?> root, CriteriaBuilder builder, SearchableAbstract.Option option) {
+        if (!SearchableAbstract
+                .CONDITION_TYPE
+                .equalsIgnoreCase(option.getType())) {
+            return builder.and();
         }
         if (SearchableAbstract
                 .EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.equal(rt.get(option.getKey()), option.getValue());
+            return builder.equal(root.get(option.getKey()), option.getValue());
         }
         if (SearchableAbstract
                 .GREATER_THAN_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.greaterThan(rt.get(option.getKey()), option.getValue());
+            return builder.greaterThan(root.get(option.getKey()), option.getValue());
         }
         if (SearchableAbstract
                 .GREATER_THAN_OR_EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.greaterThanOrEqualTo(rt.get(option.getKey()), option.getValue());
+            return builder.greaterThanOrEqualTo(root.get(option.getKey()), option.getValue());
         }
         if (SearchableAbstract
                 .LESS_THAN_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.lessThan(rt.get(option.getKey()), option.getValue());
+            return builder.lessThan(root.get(option.getKey()), option.getValue());
         }
         if (SearchableAbstract
                 .LESS_THAN_OR_EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.lessThanOrEqualTo(rt.get(option.getKey()), option.getValue());
+            return builder.lessThanOrEqualTo(root.get(option.getKey()), option.getValue());
         }
         if (SearchableAbstract
                 .IS_NULL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())) {
-            return cb.isNull(rt.get(option.getKey()));
+            return builder.isNull(root.get(option.getKey()));
         }
         if (SearchableAbstract
                 .IS_NOT_NULL_OPTION_CONDITION
+                .equalsIgnoreCase(option.getCondition())) {
+            return builder.isNotNull(root.get(option.getKey()));
+        }
+        if (SearchableAbstract
+                .LIKE_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return cb.isNotNull(rt.get(option.getKey()));
+            return builder.like(root.get(option.getKey()), option.getValue());
         }
-        return null;
+        return builder.and();
+    }
+
+    private static List<Predicate> execute(Root<?> root, CriteriaBuilder builder, List<SearchableAbstract.Mixin> mixins) {
+        final List<Predicate> predicates = new ArrayList<>();
+        if (mixins != null) {
+            for (final SearchableAbstract.Mixin mixin : mixins) {
+                final SearchableAbstract.Option option = mixin.getData();
+                final List<SearchableAbstract.Mixin> list = mixin.getList();
+                if (option != null && list == null) {
+                    if (SearchableAbstract.OR_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
+                        predicates.add(builder.or(execute(root, builder, option)));
+                    }
+                    if (SearchableAbstract.AND_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
+                        predicates.add(builder.and(execute(root, builder, option)));
+                    }
+                }
+                if (option != null && list != null) {
+                    if (SearchableAbstract.OR_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
+                        predicates.add(builder.or(execute(root, builder, list).toArray(new Predicate[0])));
+                    }
+                    if (SearchableAbstract.AND_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
+                        predicates.add(builder.and(execute(root, builder, list).toArray(new Predicate[0])));
+                    }
+                }
+            }
+        }
+        return predicates;
     }
 
 }

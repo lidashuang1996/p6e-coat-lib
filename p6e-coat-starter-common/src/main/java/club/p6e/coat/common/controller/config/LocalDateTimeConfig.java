@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.format.datetime.standard.DateTimeFormatterRegistrar;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import reactor.util.annotation.NonNull;
 
@@ -21,7 +20,6 @@ import java.time.format.DateTimeFormatter;
  * @author lidashuang
  * @version 1.0
  */
-@Component
 @Configuration
 public class LocalDateTimeConfig {
 

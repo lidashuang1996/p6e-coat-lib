@@ -36,7 +36,7 @@ public class VoucherWebFilter implements Filter {
      * 错误结果对象
      */
     private static final ResultContext ERROR_RESULT =
-            ResultContext.build(401, "Unauthorized", "Unauthorized");
+            ResultContext.build(401, "Unauthorized", "Access with invalid voucher");
 
     /**
      * 错误结果文本内容
@@ -67,6 +67,15 @@ public class VoucherWebFilter implements Filter {
         LOGGER.info("filter [ " + this.getClass() + " ] init complete ...");
     }
 
+    /**
+     * 过滤器内容的处理方法
+     *
+     * @param servletRequest  服务请求头对象
+     * @param servletResponse 服务返回头对象
+     * @param chain           内部代理对象
+     * @throws IOException      请求头和返回头处理时候可能出现的 IO 异常
+     * @throws ServletException 服务处理时候可能出现的异常
+     */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
         final Properties.Security security = properties.getSecurity();

@@ -32,7 +32,7 @@ public class VoucherWebFluxFilter implements WebFilter {
      * 错误结果对象
      */
     private static final ResultContext ERROR_RESULT =
-            ResultContext.build(401, "Unauthorized", "Unauthorized");
+            ResultContext.build(401, "Unauthorized", "Access with invalid voucher");
 
     /**
      * 错误结果文本内容
@@ -57,9 +57,9 @@ public class VoucherWebFluxFilter implements WebFilter {
     @Override
     public Mono<Void> filter(@NonNull ServerWebExchange exchange, @NonNull WebFilterChain chain) {
         final Properties.Security security = properties.getSecurity();
-        final ServerHttpRequest request = exchange.getRequest();
-        final ServerHttpResponse response = exchange.getResponse();
         if (security != null && security.isEnable()) {
+            final ServerHttpRequest request = exchange.getRequest();
+            final ServerHttpResponse response = exchange.getResponse();
             String voucher = BaseWebFluxController.getHeader(request, VOUCHER_HEADER);
             if (voucher != null) {
                 for (final String item : security.getVouchers()) {

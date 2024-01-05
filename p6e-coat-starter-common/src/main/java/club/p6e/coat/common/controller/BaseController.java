@@ -27,4 +27,19 @@ public class BaseController {
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(BaseController.class);
 
+    /**
+     * 获取是否包含 javax.servlet.ServletRequest 对象
+     *
+     * @return 是否包含 javax.servlet.ServletRequest 对象
+     */
+    public static boolean isServletRequest() {
+        boolean bool = true;
+        try {
+            Class.forName("jakarta.servlet.ServletRequest");
+        } catch (ClassNotFoundException e) {
+            bool = false;
+        }
+        return bool;
+    }
+
 }

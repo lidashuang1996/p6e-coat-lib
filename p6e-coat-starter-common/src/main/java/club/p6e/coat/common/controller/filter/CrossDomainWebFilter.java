@@ -1,16 +1,23 @@
 package club.p6e.coat.common.controller.filter;
 
+import club.p6e.coat.common.Properties;
+import club.p6e.coat.common.context.ResultContext;
+import club.p6e.coat.common.controller.BaseWebController;
+import club.p6e.coat.common.utils.JsonUtil;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Enumeration;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -25,6 +32,11 @@ public class CrossDomainWebFilter implements Filter {
      * 分隔符号
      */
     private static final String ACCESS_CONTROL_DELIMITER = ",";
+
+    /**
+     * 通用内容
+     */
+    private static final String CROSS_DOMAIN_HEADER_GENERAL_CONTENT = "*";
 
     /**
      * 跨域配置 ACCESS_CONTROL_MAX_AGE
@@ -66,9 +78,34 @@ public class CrossDomainWebFilter implements Filter {
     };
 
     /**
+     * 错误结果对象
+     */
+    private static final ResultContext ERROR_RESULT =
+            ResultContext.build(401, "Unauthorized", "Unmatched origin cross domain requests");
+
+    /**
+     * 错误结果文本内容
+     */
+    private static final String ERROR_RESULT_CONTENT = JsonUtil.toJson(ERROR_RESULT);
+
+    /**
      * 注入日志系统
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(CrossDomainWebFilter.class);
+
+    /**
+     * 配置对象
+     */
+    private final Properties properties;
+
+    /**
+     * 构造方法初始化
+     *
+     * @param properties 配置对象
+     */
+    public CrossDomainWebFilter(Properties properties) {
+        this.properties = properties;
+    }
 
     /**
      * 初始化过滤器时候的方法回调
@@ -85,40 +122,39 @@ public class CrossDomainWebFilter implements Filter {
      *
      * @param servletRequest  服务请求头对象
      * @param servletResponse 服务返回头对象
-     * @param filterChain     内部代理对象
+     * @param chain           内部代理对象
      * @throws IOException      请求头和返回头处理时候可能出现的 IO 异常
      * @throws ServletException 服务处理时候可能出现的异常
      */
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        final HttpServletRequest request = (HttpServletRequest) servletRequest;
-        final HttpServletResponse response = (HttpServletResponse) servletResponse;
-
-        // 设置 Access-Control-Allow-Origin 内容为请求头 origin 的内容
-        // 如果不存在 origin 的请求头，那么设置为 *
-        String origin = ACCESS_CONTROL_ALLOW_ORIGIN;
-        final Enumeration<String> enumeration = request.getHeaderNames();
-        if (enumeration != null) {
-            while (enumeration.hasMoreElements()) {
-                final String element = enumeration.nextElement();
-                if ("origin".equalsIgnoreCase(element)) {
-                    origin = request.getHeader(element);
+    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
+        final Properties.CrossDomain crossDomain = properties.getCrossDomain();
+        if (crossDomain != null && crossDomain.isEnable()) {
+            final HttpServletRequest request = (HttpServletRequest) servletRequest;
+            final HttpServletResponse response = (HttpServletResponse) servletResponse;
+            String origin = BaseWebController.getHeader(HttpHeaders.ORIGIN);
+            if (validationOrigin(origin, crossDomain.getWhiteList())) {
+                origin = origin == null ? ACCESS_CONTROL_ALLOW_ORIGIN : origin;
+                response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+                response.setHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE, String.valueOf(ACCESS_CONTROL_MAX_AGE));
+                response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, String.valueOf(ACCESS_CONTROL_ALLOW_CREDENTIALS));
+                response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, String.join(ACCESS_CONTROL_DELIMITER, ACCESS_CONTROL_ALLOW_HEADERS));
+                response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS,
+                        Arrays.stream(ACCESS_CONTROL_ALLOW_METHODS).map(HttpMethod::name).collect(Collectors.joining(ACCESS_CONTROL_DELIMITER)));
+                if (HttpMethod.OPTIONS.matches(request.getMethod().toUpperCase())) {
+                    response.setStatus(HttpStatus.OK.value());
+                    // response.setStatus(HttpStatus.NO_CONTENT.value());
+                } else {
+                    chain.doFilter(servletRequest, servletResponse);
+                }
+            } else {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                try (final OutputStream output = response.getOutputStream()) {
+                    output.write(ERROR_RESULT_CONTENT.getBytes(StandardCharsets.UTF_8));
                 }
             }
-        }
-
-        response.setHeader("Access-Control-Allow-Origin", origin);
-        response.setHeader("Access-Control-Max-Age", String.valueOf(ACCESS_CONTROL_MAX_AGE));
-        response.setHeader("Access-Control-Allow-Credentials", String.valueOf(ACCESS_CONTROL_ALLOW_CREDENTIALS));
-        response.setHeader("Access-Control-Allow-Headers", String.join(ACCESS_CONTROL_DELIMITER, ACCESS_CONTROL_ALLOW_HEADERS));
-        response.setHeader("Access-Control-Allow-Methods",
-                Arrays.stream(ACCESS_CONTROL_ALLOW_METHODS).map(HttpMethod::name).collect(Collectors.joining(ACCESS_CONTROL_DELIMITER)));
-
-        if (HttpMethod.OPTIONS.matches(request.getMethod().toUpperCase())) {
-            response.setStatus(HttpStatus.OK.value());
-            // response.setStatus(HttpStatus.NO_CONTENT.value());
         } else {
-            filterChain.doFilter(servletRequest, servletResponse);
+            chain.doFilter(servletRequest, servletResponse);
         }
     }
 
@@ -128,6 +164,24 @@ public class CrossDomainWebFilter implements Filter {
     @Override
     public void destroy() {
         LOGGER.info("filter [ " + this.getClass() + " ] destroy complete !!");
+    }
+
+    /**
+     * 验证 origin 是否合法
+     *
+     * @param origin    origin
+     * @param whiteList whiteList
+     * @return true or false
+     */
+    public boolean validationOrigin(String origin, List<String> whiteList) {
+        if (whiteList != null && !whiteList.isEmpty()) {
+            for (final String item : whiteList) {
+                if (item.equalsIgnoreCase(CROSS_DOMAIN_HEADER_GENERAL_CONTENT) || origin.startsWith(item)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
 }

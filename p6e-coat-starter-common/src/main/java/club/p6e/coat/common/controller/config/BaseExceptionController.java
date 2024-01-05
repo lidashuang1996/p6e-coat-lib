@@ -1,4 +1,4 @@
-package club.p6e.coat.common.controller;
+package club.p6e.coat.common.controller.config;
 
 import club.p6e.coat.common.context.ResultContext;
 import club.p6e.coat.common.error.CustomException;

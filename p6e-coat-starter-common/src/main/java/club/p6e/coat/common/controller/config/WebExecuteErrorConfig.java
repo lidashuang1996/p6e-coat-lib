@@ -1,4 +1,4 @@
-package club.p6e.coat.common.context;
+package club.p6e.coat.common.controller.config;
 
 import club.p6e.coat.common.error.CustomException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -9,7 +9,22 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
  * @author lidashuang
  * @version 1.0
  */
-public final class WebResultErrorContent {
+public final class WebExecuteErrorConfig {
+
+    /**
+     * 初始化
+     */
+    public static void init() {
+        boolean bool = true;
+        try {
+            Class.forName("javax.servlet.ServletRequest");
+        } catch (ClassNotFoundException e) {
+            bool = false;
+        }
+        if (bool) {
+            CustomException.registerTransformer(HttpRequestMethodNotSupportedException.class, new ExtendException1());
+        }
+    }
 
     /**
      * 扩展异常类
@@ -29,21 +44,6 @@ public final class WebResultErrorContent {
         public ExtendException1() {
             super(HttpRequestMethodNotSupportedException.class, ExtendException1.class,
                     "HTTP_REQUEST_METHOD_NOT_SUPPORTED_EXCEPTION", DEFAULT_CODE, DEFAULT_SKETCH, "不支持的请求方法");
-        }
-    }
-
-    /**
-     * 初始化
-     */
-    public static void init() {
-        boolean bool = true;
-        try {
-            Class.forName("javax.servlet.ServletRequest");
-        } catch (ClassNotFoundException e) {
-            bool = false;
-        }
-        if (bool) {
-            CustomException.registerTransformer(HttpRequestMethodNotSupportedException.class, new ExtendException1());
         }
     }
 
