@@ -4,6 +4,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,8 +21,9 @@ import java.time.format.DateTimeFormatter;
  * @author lidashuang
  * @version 1.0
  */
-@Configuration
-public class LocalDateTimeConfig {
+//@Configuration
+//@ConditionalOnBean(WebConditionBean.class)
+public class WebLocalDateTimeConfig {
 
     /**
      * 日期格式
@@ -33,19 +35,20 @@ public class LocalDateTimeConfig {
      */
     private static final String DATE_TIME_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
-    @Bean(value = "club.p6e.coat.common.controller.config.WebMvcConfigurer")
-    public WebMvcConfigurer injectWebMvcConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addFormatters(@NonNull FormatterRegistry registry) {
-                final DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
-                registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
-                registrar.registerFormatters(registry);
-            }
-        };
-    }
 
-    @Bean(value = "club.p6e.coat.common.controller.config.Jackson2ObjectMapperBuilderCustomizer")
+    //@Bean
+//    public WebMvcConfigurer injectWebMvcConfigurer() {
+//        return new WebMvcConfigurer() {
+//            @Override
+//            public void addFormatters(@NonNull FormatterRegistry registry) {
+//                final DateTimeFormatterRegistrar registrar = new DateTimeFormatterRegistrar();
+//                registrar.setDateTimeFormatter(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN));
+//                registrar.registerFormatters(registry);
+//            }
+//        };
+//    }
+
+    //@Bean
     public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
         return builder -> {
             builder.serializerByType(LocalDate.class, new LocalDateSerializer(DateTimeFormatter.ofPattern(DATE_PATTERN)));

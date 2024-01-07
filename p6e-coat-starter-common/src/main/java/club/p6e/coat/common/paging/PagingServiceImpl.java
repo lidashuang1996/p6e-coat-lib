@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
  * @author lidashuang
  * @version 1.0
  */
-@ConditionalOnMissingBean(
-        value = PagingService.class,
-        ignored = PagingServiceImpl.class
-)
-@Component(value = "club.p6e.coat.common.paging.PagingDefaultImpl")
+//@Component
+//@ConditionalOnMissingBean(
+//        value = PagingService.class,
+//        ignored = PagingServiceImpl.class
+//)
 public class PagingServiceImpl implements PagingService {
 
     /**

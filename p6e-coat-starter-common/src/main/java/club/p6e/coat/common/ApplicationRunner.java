@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * @author lidashuang
  * @version 1.0
  */
-@Component(value = "club.p6e.coat.common.ApplicationListener")
+@Component(value = "club.p6e.coat.common.ApplicationRunner")
 public class ApplicationRunner implements CommandLineRunner {
 
     /**
