@@ -11,6 +11,5 @@ import org.springframework.stereotype.Component;
 @ConditionalOnClass(name = "org.springframework.web.reactive.package-info")
 public class WebFluxConditionBean {
     public WebFluxConditionBean() {
-        System.out.println("WebFluxConditionBeanWebFluxConditionBeanWebFluxConditionBeanWebFluxConditionBean");
     }
 }

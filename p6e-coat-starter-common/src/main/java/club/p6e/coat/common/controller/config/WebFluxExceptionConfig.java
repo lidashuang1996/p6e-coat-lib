@@ -100,7 +100,7 @@ public class WebFluxExceptionConfig extends DefaultErrorWebExceptionHandler {
                 errorMap.remove(ERROR);
                 errorMap.remove(STATUS);
                 return ServerResponse
-                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .status(HttpStatus.OK)
                         .contentType(MediaType.APPLICATION_JSON)
                         .body(Mono.just(JsonUtil.toJson(errorMap)), String.class);
             }

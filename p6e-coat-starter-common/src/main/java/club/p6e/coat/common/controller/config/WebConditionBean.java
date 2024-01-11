@@ -12,6 +12,5 @@ import org.springframework.stereotype.Component;
 public class WebConditionBean {
 
     public WebConditionBean() {
-        System.out.println("WebConditionBeanWebConditionBeanWebConditionBean");
     }
 }
