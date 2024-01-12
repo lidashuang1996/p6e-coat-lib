@@ -1,7 +1,5 @@
-club.p6e.coat.common.controller.config.WebConditionBean
-club.p6e.coat.common.controller.config.WebFluxConditionBean
-club.p6e.coat.common.controller.config.WebLocalDateTimeConfig
 club.p6e.coat.common.controller.config.WebFluxExceptionConfig
+club.p6e.coat.common.controller.config.WebLocalDateTimeConfig
 club.p6e.coat.common.controller.BaseVersionController
 club.p6e.coat.common.paging.PagingServiceImpl
 club.p6e.coat.common.ApplicationRunner

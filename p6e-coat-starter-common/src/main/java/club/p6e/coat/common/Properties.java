@@ -6,6 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,37 +17,32 @@ import java.util.Map;
  */
 @Data
 @Accessors(chain = true)
-@Component(value = Properties.BEAN_NAME)
 @ConfigurationProperties(prefix = "p6e.coat.common")
+@Component(value = "club.p6e.coat.common.Properties")
 public class Properties implements Serializable {
-
-    /**
-     * 注入的 BEAN 的名称
-     */
-    public static final String BEAN_NAME = "club.p6e.coat.common.Properties";
 
     /**
      * 版本号
      */
-    private String version = "unknown";
+    private volatile String version = "unknown";
 
     /**
      * 安全
      */
-    private Security security = new Security();
+    private volatile Security security = new Security();
 
     /**
      * 安全
      */
-    private CrossDomain crossDomain = new CrossDomain();
+    private volatile CrossDomain crossDomain = new CrossDomain();
 
     /**
      * 雪花
      */
-    private Map<String, Snowflake> snowflake = new HashMap<>();
+    private volatile Map<String, Snowflake> snowflake = new HashMap<>();
 
     @Data
-    public static class Security {
+    public static class Security implements Serializable {
 
         /**
          * 是否启用
@@ -56,7 +52,7 @@ public class Properties implements Serializable {
         /**
          * 凭证
          */
-        private String[] vouchers = new String[]{};
+        private List<String> vouchers = new ArrayList<>();
 
     }
 
@@ -69,17 +65,17 @@ public class Properties implements Serializable {
         /**
          * 是否启动
          */
-        private boolean enable = false;
+        private volatile boolean enable = false;
 
         /**
          * 白名单
          */
-        private List<String> whiteList = List.of("*");
+        private volatile List<String> whiteList = new ArrayList<>();
     }
 
     @Data
-    public static class Snowflake {
-        private Integer workerId;
-        private Integer datacenterId;
+    public static class Snowflake implements Serializable {
+        private volatile Integer workerId;
+        private volatile Integer dataCenterId;
     }
 }

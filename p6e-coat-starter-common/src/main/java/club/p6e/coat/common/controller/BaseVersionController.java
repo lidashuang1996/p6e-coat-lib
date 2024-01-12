@@ -2,6 +2,7 @@ package club.p6e.coat.common.controller;
 
 import club.p6e.coat.common.Properties;
 import club.p6e.coat.common.context.ResultContext;
+import club.p6e.coat.common.utils.SpringUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,20 +17,6 @@ import reactor.core.publisher.Mono;
 @Component(value = "club.p6e.coat.common.controller.BaseVersionController")
 public class BaseVersionController extends BaseController {
 
-    /**
-     * 配置文件对象
-     */
-    private final Properties properties;
-
-    /**
-     * 构造方法初始化
-     *
-     * @param properties 配置文件对象
-     */
-    public BaseVersionController(Properties properties) {
-        this.properties = properties;
-    }
-
     @RequestMapping("")
     public Object def1() {
         return def2();
@@ -40,9 +27,9 @@ public class BaseVersionController extends BaseController {
     public Object def2() {
         try {
             Class.forName("jakarta.servlet.ServletRequest");
-            return ResultContext.build(properties.getVersion());
+            return ResultContext.build(SpringUtil.getBean(Properties.class).getVersion());
         } catch (Exception e) {
-            return Mono.just(ResultContext.build(properties.getVersion()));
+            return Mono.just(ResultContext.build(SpringUtil.getBean(Properties.class).getVersion()));
         }
     }
 

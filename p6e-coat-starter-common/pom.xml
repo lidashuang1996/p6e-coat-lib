@@ -14,6 +14,15 @@
     <description>p6e-coat-starter-common</description>
 
     <dependencies>
+
+        <!-- Http Client [START] -->
+        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+        </dependency>
+        <!-- Http Client [END] -->
+
         <!-- Spring Web [ START ] -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -43,27 +52,5 @@
         </dependency>
         <!-- Spring Boot Configuration Processor [END] -->
 
-        <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-        </dependency>
     </dependencies>
-
-    <!--    <build>-->
-    <!--        <plugins>-->
-    <!--            <plugin>-->
-    <!--                <groupId>org.springframework.boot</groupId>-->
-    <!--                <artifactId>spring-boot-maven-plugin</artifactId>-->
-    <!--                <configuration>-->
-    <!--                    <excludes>-->
-    <!--                        <exclude>-->
-    <!--                            <groupId>org.projectlombok</groupId>-->
-    <!--                            <artifactId>lombok</artifactId>-->
-    <!--                        </exclude>-->
-    <!--                    </excludes>-->
-    <!--                </configuration>-->
-    <!--            </plugin>-->
-    <!--        </plugins>-->
-    <!--    </build>-->
 </project>

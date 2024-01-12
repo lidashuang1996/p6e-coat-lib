@@ -36,9 +36,9 @@ public class ApplicationRunner implements CommandLineRunner {
         final Properties properties = SpringUtil.getBean(Properties.class);
         for (final String name : properties.getSnowflake().keySet()) {
             final Properties.Snowflake snowflake = properties.getSnowflake().get(name);
-            SnowflakeIdUtil.register(name, snowflake.getWorkerId(), snowflake.getDatacenterId());
+            SnowflakeIdUtil.register(name, snowflake.getWorkerId(), snowflake.getDataCenterId());
             LOGGER.info("p6e coat application initialization snowflake [ worker_id: "
-                    + snowflake.getWorkerId() + ", datacenter_id: " + snowflake.getDatacenterId() + "] ==> " + name);
+                    + snowflake.getWorkerId() + ", datacenter_id: " + snowflake.getDataCenterId() + "] ==> " + name);
         }
     }
 }
