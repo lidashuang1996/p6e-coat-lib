@@ -34,7 +34,7 @@ public class BaseWebFluxController extends BaseController {
             accessToken = getHeaderToken(request);
         }
         if (accessToken == null) {
-            accessToken = getCookieRefreshToken(request);
+            accessToken = getCookieAccessToken(request);
         }
         return accessToken;
     }
@@ -58,7 +58,7 @@ public class BaseWebFluxController extends BaseController {
     public static String getRefreshToken(ServerHttpRequest request) {
         String refreshToken = getParam(request, REFRESH_TOKEN_PARAM1, REFRESH_TOKEN_PARAM2, REFRESH_TOKEN_PARAM3);
         if (refreshToken == null) {
-            refreshToken = getCookieAccessToken(request);
+            refreshToken = getCookieRefreshToken(request);
         }
         return refreshToken;
     }
