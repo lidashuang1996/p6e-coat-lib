@@ -165,6 +165,10 @@ public abstract class SearchableAbstract<I extends SearchableAbstract.Option> ex
         return validationOptionsToMappings(clazz, this);
     }
 
+    public boolean isValidationFailure(Class<?> clazz) {
+        return !validation(clazz);
+    }
+
     /**
      * 验证参数是否合法
      *

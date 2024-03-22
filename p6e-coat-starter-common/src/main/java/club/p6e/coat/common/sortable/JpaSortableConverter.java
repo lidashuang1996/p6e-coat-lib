@@ -13,7 +13,7 @@ import java.util.List;
  * @author lidashuang
  * @version 1.0
  */
-public class JpaSortableContextConverter {
+public class JpaSortableConverter {
 
     public static Sort toSort(SortableContext context) {
         return toSort(context, null);
@@ -32,6 +32,9 @@ public class JpaSortableContextConverter {
     }
 
     private static Sort execute(SortableContext context, Sort sort) {
+        if (context == null) {
+            return sort;
+        }
         final List<Sort.Order> orders = new ArrayList<>();
         for (final SortableAbstract.Option option : context) {
             if (SortableAbstract.ASC.equals(option.getCondition())) {
@@ -50,15 +53,17 @@ public class JpaSortableContextConverter {
 
     private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SortableContext context, Sort sort) {
         final List<Order> orders = new ArrayList<>();
-        for (final SortableAbstract.Option option : context) {
-            if (SortableAbstract.ASC.equals(option.getCondition())) {
-                orders.add(builder.asc(root.get(option.getContent())));
-            }
-            if (SortableAbstract.DESC.equals(option.getCondition())) {
-                orders.add(builder.desc(root.get(option.getContent())));
+        if (context != null) {
+            for (final SortableAbstract.Option option : context) {
+                if (SortableAbstract.ASC.equals(option.getCondition())) {
+                    orders.add(builder.asc(root.get(option.getContent())));
+                }
+                if (SortableAbstract.DESC.equals(option.getCondition())) {
+                    orders.add(builder.desc(root.get(option.getContent())));
+                }
             }
         }
-        if (orders.isEmpty()) {
+        if (orders.isEmpty() && sort != null) {
             for (final Sort.Order order : sort) {
                 if (order.isAscending()) {
                     orders.add(builder.asc(root.get(order.getProperty())));

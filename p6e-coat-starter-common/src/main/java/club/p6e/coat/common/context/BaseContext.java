@@ -1,5 +1,6 @@
 package club.p6e.coat.common.context;
 
+import club.p6e.coat.common.pagination.PaginationContext;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
@@ -16,8 +17,13 @@ public class BaseContext implements Serializable {
     @Data
     @Accessors(chain = true)
     public static class PagingParam implements Serializable {
+        private String all;
         private Integer size;
         private Integer page;
+
+        public PaginationContext getPaginationContext() {
+            return new PaginationContext(this.all, this.page, this.size);
+        }
     }
 
     @Data
