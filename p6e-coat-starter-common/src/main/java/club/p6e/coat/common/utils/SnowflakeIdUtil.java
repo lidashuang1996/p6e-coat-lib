@@ -131,7 +131,7 @@ public final class SnowflakeIdUtil {
                 timestamp = tilNextMillis();
             }
         } else {
-            sequence = 0L;
+            sequence = (sequence % 2 == 0 ? sequence + 1 : sequence);
         }
         lastTimestamp = timestamp;
 

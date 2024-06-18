@@ -1,4 +1,4 @@
-package club.p6e.coat.common.pagination;
+package club.p6e.coat.common.pageable;
 
 import org.springframework.data.domain.PageRequest;
 
@@ -6,9 +6,9 @@ import org.springframework.data.domain.PageRequest;
  * @author lidashuang
  * @version 1.0
  */
-public class JpaPaginationConverter {
+public class JpaPageableConverter {
 
-    public static PageRequest execute(PaginationContext context) {
+    public static PageRequest execute(PageableContext context) {
         if (context != null) {
             if (context.getAll() == null) {
                 return execute(context.getPage(), context.getSize());

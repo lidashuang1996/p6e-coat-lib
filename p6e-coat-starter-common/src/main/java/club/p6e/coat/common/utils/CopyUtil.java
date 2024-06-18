@@ -4,7 +4,6 @@ import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Function;
 
 /**
  * CopyUtil
@@ -13,7 +12,6 @@ import java.util.function.Function;
  * @author lidashuang
  * @version 2.0
  */
-@SuppressWarnings("ALL")
 public final class CopyUtil {
 
     /**
@@ -639,8 +637,8 @@ public final class CopyUtil {
      * @return 转换的对象
      */
     @SuppressWarnings("ALL")
-    public static Map<String, ?> toMap(Object sourceObject) {
-        return toMap(sourceObject, null, false);
+    public static Map<String, Object> toMap(Object sourceObject) {
+        return (Map<String, Object>) toMap(sourceObject, null, false);
     }
 
     /**
@@ -805,6 +803,27 @@ public final class CopyUtil {
         return defaultTargetObject;
     }
 
+    public static Map<String, Object> objectToMap(Object source) {
+        if (source == null
+                || isMapType(source.getClass())
+                || isCollectionType(source.getClass())) {
+            return null;
+        } else {
+            try {
+                final Map<String, Object> result = new HashMap<>();
+                final Class<?> sourceClass = source.getClass();
+                for (final Field field : getFields(sourceClass)) {
+                    field.setAccessible(true);
+                    result.put(field.getName(), field.get(source));
+                }
+                return result;
+            } catch (Exception ignore) {
+                // ignore
+                return null;
+            }
+        }
+    }
+
     /**
      * 判断是否为基础类型
      *
@@ -815,14 +834,14 @@ public final class CopyUtil {
         final String clazzTypeName = clazz.getTypeName();
         return switch (clazzTypeName) {
             case "byte", "java.lang.Byte",
-                    "short", "java.lang.Short",
-                    "int", "java.lang.Integer",
-                    "long", "java.lang.Long",
-                    "float", "java.lang.Float",
-                    "double", "java.lang.Double",
-                    "char", "java.lang.Character",
-                    "boolean", "java.lang.Boolean",
-                    "java.lang.String", "java.lang.Object" -> true;
+                 "short", "java.lang.Short",
+                 "int", "java.lang.Integer",
+                 "long", "java.lang.Long",
+                 "float", "java.lang.Float",
+                 "double", "java.lang.Double",
+                 "char", "java.lang.Character",
+                 "boolean", "java.lang.Boolean",
+                 "java.lang.String", "java.lang.Object" -> true;
             default -> false;
         };
     }

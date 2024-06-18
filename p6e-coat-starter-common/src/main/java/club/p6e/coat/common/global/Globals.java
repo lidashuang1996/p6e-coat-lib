@@ -48,6 +48,33 @@ public final class Globals {
         return null;
     }
 
+    public static String getUserInfoContent() {
+        if (BaseController.isServletRequest()) {
+            try {
+                if (DEBUG) {
+                    return JsonUtil.toJson(GlobalUserInfo.DEBUG);
+                } else {
+                    return BaseWebController.getHeader(USER_INFO_HEADER);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static String getUserProject() {
+        return "20000";
+    }
+
+    public static String getUserOrganization() {
+        return "20000";
+    }
+
+    public static String getLanguage() {
+        return "zh-cn";
+    }
+
     public static GlobalUserInfo getUserInfo(ServerHttpRequest request) {
         if (!BaseController.isServletRequest()) {
             try {

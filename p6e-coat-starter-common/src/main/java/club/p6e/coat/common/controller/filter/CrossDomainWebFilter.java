@@ -133,7 +133,7 @@ public class CrossDomainWebFilter implements Filter {
             final HttpServletRequest request = (HttpServletRequest) servletRequest;
             final HttpServletResponse response = (HttpServletResponse) servletResponse;
             String origin = BaseWebController.getHeader(HttpHeaders.ORIGIN);
-            if (validationOrigin(origin, crossDomain.getWhiteList())) {
+            if (validationOrigin(origin, List.of(crossDomain.getWhiteList()))) {
                 origin = origin == null ? ACCESS_CONTROL_ALLOW_ORIGIN : origin;
                 response.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
                 response.setHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE, String.valueOf(ACCESS_CONTROL_MAX_AGE));

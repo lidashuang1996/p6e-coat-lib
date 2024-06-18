@@ -6,9 +6,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,22 +22,22 @@ public class Properties implements Serializable {
     /**
      * 版本号
      */
-    private volatile String version = "unknown";
+    private String version = "unknown";
 
     /**
      * 安全
      */
-    private volatile Security security = new Security();
+    private Security security = new Security();
 
     /**
      * 安全
      */
-    private volatile CrossDomain crossDomain = new CrossDomain();
+    private CrossDomain crossDomain = new CrossDomain();
 
     /**
      * 雪花
      */
-    private volatile Map<String, Snowflake> snowflake = new HashMap<>();
+    private Map<String, Snowflake> snowflake = new HashMap<>();
 
     @Data
     public static class Security implements Serializable {
@@ -52,7 +50,7 @@ public class Properties implements Serializable {
         /**
          * 凭证
          */
-        private List<String> vouchers = new ArrayList<>();
+        private String[] vouchers = new String[]{};
 
     }
 
@@ -65,17 +63,17 @@ public class Properties implements Serializable {
         /**
          * 是否启动
          */
-        private volatile boolean enable = false;
+        private boolean enable = false;
 
         /**
          * 白名单
          */
-        private volatile List<String> whiteList = new ArrayList<>();
+        private String[] whiteList = new String[]{};
     }
 
     @Data
     public static class Snowflake implements Serializable {
-        private volatile Integer workerId;
-        private volatile Integer dataCenterId;
+        private Integer workerId;
+        private Integer dataCenterId;
     }
 }

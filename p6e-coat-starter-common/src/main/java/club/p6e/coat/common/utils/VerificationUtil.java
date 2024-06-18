@@ -11,11 +11,11 @@ import java.util.regex.Pattern;
 public final class VerificationUtil {
 
     public static boolean validationCode(String code) {
-        return true;
+        return code.length() == 6;
     }
 
     public static boolean validationPassword(String password) {
-        return true;
+        return password.length() >= 6;
     }
 
     /**

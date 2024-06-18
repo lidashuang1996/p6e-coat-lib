@@ -2,10 +2,20 @@ package club.p6e.coat.common.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.FileUrlResource;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.core.io.buffer.DataBufferUtils;
+import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Predicate;
 
 /**
@@ -15,7 +25,7 @@ import java.util.function.Predicate;
  * @version 1.0
  */
 @SuppressWarnings("ALL")
-public final class FileUtil {
+public final class FileUtil2 {
 
     /**
      * 文件连接符号
@@ -29,9 +39,15 @@ public final class FileUtil {
     private static final String PATH_OPPOSE_CONNECT_CHAR = "\\\\";
 
     /**
+     * 文件缓冲区大小
+     */
+    private static final int FILE_BUFFER_SIZE = 1024 * 1024 * 5;
+    private static final DefaultDataBufferFactory DEFAULT_DATA_BUFFER_FACTORY = new DefaultDataBufferFactory();
+
+    /**
      * 日志对象
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileUtil2.class);
 
     /**
      * 验证文件夹是否存在
@@ -287,6 +303,72 @@ public final class FileUtil {
     }
 
     /**
+     * 读取文件内容
+     *
+     * @param file 文件对象
+     * @return Flux<DataBuffer> 读取的文件内容
+     */
+    @SuppressWarnings("ALL")
+    public static Flux<DataBuffer> readFile(File file) {
+        return readFile(file, 0L, -1L);
+    }
+
+    /**
+     * 读取文件内容
+     *
+     * @param file     文件对象
+     * @param position 文件索引
+     * @param size     文件长度
+     * @return Flux<DataBuffer> 读取的文件内容
+     */
+    @SuppressWarnings("ALL")
+    public static Flux<DataBuffer> readFile(File file, long position, long size) {
+        if (file != null && checkFileExist(file)) {
+            try {
+                final long fSize = size >= 0 ? size : 1 + size + file.length();
+                final AtomicLong at = new AtomicLong(0);
+                return DataBufferUtils
+                        .read(new FileUrlResource(file.getAbsolutePath()), position, DEFAULT_DATA_BUFFER_FACTORY, FILE_BUFFER_SIZE)
+                        .map(b -> {
+                            if (at.get() >= fSize) {
+                                DataBufferUtils.release(b);
+                                return DEFAULT_DATA_BUFFER_FACTORY.allocateBuffer(0);
+                            } else {
+                                final int rp = b.readableByteCount();
+                                if (at.addAndGet(rp) >= fSize) {
+                                    final byte[] bytes = new byte[(int) (fSize - at.get() + rp)];
+                                    b.read(bytes);
+                                    DataBufferUtils.release(b);
+                                    return DEFAULT_DATA_BUFFER_FACTORY.wrap(bytes);
+                                } else {
+                                    return b;
+                                }
+                            }
+                        });
+            } catch (IOException e) {
+                return Flux.error(e);
+            }
+        } else {
+            return Flux.error(new FileNotFoundException(
+                    "fun readFile(File file). -> The read content is not a file.The read content is not a file"
+            ));
+        }
+    }
+
+    /**
+     * 写入文件
+     *
+     * @param dataBufferFlux DataBuffer 对象
+     * @param file           文件对象
+     * @return Mono<Void> 对象
+     */
+    @SuppressWarnings("ALL")
+    public static Mono<Void> writeFile(Flux<DataBuffer> dataBufferFlux, File file) {
+        return DataBufferUtils.write(dataBufferFlux, file.toPath(),
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+
+    /**
      * 文件拼接
      *
      * @param left  文件名称
@@ -430,6 +512,53 @@ public final class FileUtil {
             }
         }
         return length;
+    }
+
+    /**
+     * 合并文件分片
+     *
+     * @param files    文件列表
+     * @param filePath 合并后的文件路径
+     * @return 合并后的文件对象
+     */
+    @SuppressWarnings("ALL")
+    public static Mono<File> mergeFileSlice(File[] files, String filePath) {
+        if (files == null
+                || filePath == null
+                || files.length == 0) {
+            return Mono.empty();
+        } else {
+            final File file = new File(filePath);
+            if (checkFileExist(file)) {
+                deleteFile(file);
+            }
+            return writeFile(Flux.concat(
+                    Arrays.stream(files).map(FileUtil2::readFile).toList()
+            ), file).then(Mono.just(file));
+        }
+    }
+
+    /**
+     * 合并文件分片
+     *
+     * @param files 文件列表
+     * @param file  合并后的文件对象
+     * @return 合并后的文件对象
+     */
+    @SuppressWarnings("ALL")
+    public static Mono<File> mergeFileSlice(File[] files, File file) {
+        if (files == null
+                || file == null
+                || files.length == 0) {
+            return Mono.empty();
+        } else {
+            if (checkFileExist(file)) {
+                deleteFile(file);
+            }
+            return writeFile(Flux.concat(
+                    Arrays.stream(files).map(FileUtil2::readFile).toList()
+            ), file).then(Mono.just(file));
+        }
     }
 
     /**

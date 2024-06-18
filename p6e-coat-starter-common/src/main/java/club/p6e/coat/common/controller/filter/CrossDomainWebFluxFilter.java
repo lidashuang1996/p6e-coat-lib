@@ -104,7 +104,7 @@ public class CrossDomainWebFluxFilter implements WebFilter {
             final ServerHttpRequest request = exchange.getRequest();
             final ServerHttpResponse response = exchange.getResponse();
             String origin = BaseWebFluxController.getHeader(request, HttpHeaders.ORIGIN);
-            if (validationOrigin(origin, crossDomain.getWhiteList())) {
+            if (validationOrigin(origin, List.of(crossDomain.getWhiteList()))) {
                 response.getHeaders().setAccessControlMaxAge(ACCESS_CONTROL_MAX_AGE);
                 response.getHeaders().setAccessControlAllowOrigin(origin == null ? ACCESS_CONTROL_ALLOW_ORIGIN : origin);
                 response.getHeaders().setAccessControlAllowCredentials(ACCESS_CONTROL_ALLOW_CREDENTIALS);

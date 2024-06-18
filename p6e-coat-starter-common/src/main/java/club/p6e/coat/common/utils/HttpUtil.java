@@ -15,7 +15,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.springframework.http.HttpHeaders;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -69,6 +71,32 @@ public final class HttpUtil {
         return doNetwork(httpClient, httpGet, responseHandler);
     }
 
+    public static InputStream doGetFile(String url) {
+        return doGetFile(HTTP_CLIENT, url, null, null);
+    }
+
+    public static InputStream doGetFile(HttpClient httpClient, String url, Map<String, String> headers, Map<String, String> params) {
+        try {
+            final HttpGet httpGet = new HttpGet();
+            if (headers != null) {
+                for (final String key : headers.keySet()) {
+                    httpGet.setHeader(key, headers.get(key));
+                }
+            }
+            if (params != null) {
+                final String content = params.entrySet().stream().map(entry ->
+                        entry.getKey() + "=" + URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8)
+                ).reduce((a, b) -> a + "&" + b).orElse("");
+                url += "?" + content;
+            }
+            httpGet.setURI(URI.create(url));
+            return doGet(httpClient, httpGet, HttpUtil::resultToInputStream);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+
     public static String doPost(String url) {
         return doPost(url, null);
     }
@@ -83,6 +111,15 @@ public final class HttpUtil {
 
     public static String doPost(String url, Map<String, String> headers, Map<String, String> params) {
         return doPost(HTTP_CLIENT, url, headers, params);
+    }
+
+    public static String doPost(String url, Map<String, String> headers, HttpEntity httpEntity) {
+        try {
+            return doPost(HTTP_CLIENT, url, headers, httpEntity);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public static String doPost(HttpClient httpClient, String url, Map<String, String> headers, String params) {
@@ -157,6 +194,24 @@ public final class HttpUtil {
                 if (resultHttpEntity != null && resultHttpEntity.getContent() != null) {
                     resultHttpEntity.getContent().close();
                 }
+            }
+        }
+    }
+
+    private static InputStream resultToInputStream(HttpResponse httpResponse) throws IOException {
+        HttpEntity httpEntity = null;
+        try {
+            if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+                httpEntity = httpResponse.getEntity();
+                return httpEntity.getContent();
+            } else {
+                return null;
+            }
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (httpResponse != null && httpEntity != null && httpEntity.getContent() != null) {
+                httpEntity.getContent().close();
             }
         }
     }
