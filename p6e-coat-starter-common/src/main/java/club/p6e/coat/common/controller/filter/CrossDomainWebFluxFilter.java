@@ -57,7 +57,10 @@ public class CrossDomainWebFluxFilter implements WebFilter {
             "Referer",
             "User-Agent",
             "Content-Type",
-            "Authorization"
+            "Authorization",
+            "X-Project",
+            "X-Voucher",
+            "X-Language"
     };
 
     /**

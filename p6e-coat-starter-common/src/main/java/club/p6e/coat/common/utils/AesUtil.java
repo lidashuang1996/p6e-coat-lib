@@ -5,6 +5,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Arrays;
 import java.util.Base64;
 
 /**
@@ -12,6 +13,12 @@ import java.util.Base64;
  * @version 1.0
  */
 public final class AesUtil {
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(
+                AesUtil.generateKey().getEncoded().length
+        );
+    }
 
     public static Key generateKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");

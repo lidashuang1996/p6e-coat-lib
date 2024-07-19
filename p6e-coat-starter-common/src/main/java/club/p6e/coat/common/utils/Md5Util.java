@@ -16,6 +16,14 @@ public final class Md5Util {
         }
     }
 
+    public static String execute(byte[] bytes) {
+        try {
+            return bytesToHex(MessageDigest.getInstance("MD5").digest(bytes));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private static String bytesToHex(byte[] bytes) {
         StringBuilder hexStringBuilder = new StringBuilder(2 * bytes.length);
         for (byte b : bytes) {

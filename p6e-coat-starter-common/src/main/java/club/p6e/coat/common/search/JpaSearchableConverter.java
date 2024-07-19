@@ -15,50 +15,54 @@ import java.util.List;
 public class JpaSearchableConverter {
 
     public static void injectSearch(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context) {
-        execute(root, query, builder, context);
+        execute(root, query, builder, context, null);
     }
 
-    private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context) {
-        if (context != null && !context.isEmpty()) {
-            query.where(execute(root, builder, SearchableContext.extractOptions(context)).toArray(new Predicate[0]));
+    public static void injectSearch(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context, Predicate predicate) {
+        execute(root, query, builder, context, predicate);
+    }
+
+    private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context, Predicate predicate) {
+        final List<Predicate> predicates = new ArrayList<>();
+        if (predicate != null) {
+            predicates.add(predicate);
         }
+        if (context != null && !context.isEmpty()) {
+            predicates.addAll(execute(root, builder, SearchableContext.extractOptions(context)));
+        }
+        query.where(predicates.toArray(new Predicate[0]));
     }
 
     private static Predicate execute(Root<?> root, CriteriaBuilder builder, SearchableAbstract.Option option) {
-        if (!SearchableAbstract
-                .CONDITION_TYPE
-                .equalsIgnoreCase(option.getType())) {
-            return builder.and();
-        }
         if (SearchableAbstract
                 .EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.equal(root.get(option.getKey()), option.getValue());
+            return builder.equal(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
                 .GREATER_THAN_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.greaterThan(root.get(option.getKey()), option.getValue());
+            return builder.greaterThan(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
                 .GREATER_THAN_OR_EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.greaterThanOrEqualTo(root.get(option.getKey()), option.getValue());
+            return builder.greaterThanOrEqualTo(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
                 .LESS_THAN_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.lessThan(root.get(option.getKey()), option.getValue());
+            return builder.lessThan(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
                 .LESS_THAN_OR_EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.lessThanOrEqualTo(root.get(option.getKey()), option.getValue());
+            return builder.lessThanOrEqualTo(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
                 .IS_NULL_OPTION_CONDITION
@@ -74,7 +78,7 @@ public class JpaSearchableConverter {
                 .LIKE_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.like(root.get(option.getKey()), option.getValue());
+            return builder.like(root.get(option.getKey()).as(String.class), option.getValue());
         }
         return builder.and();
     }

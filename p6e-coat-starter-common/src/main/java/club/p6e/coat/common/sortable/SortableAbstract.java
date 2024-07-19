@@ -126,8 +126,10 @@ public abstract class SortableAbstract<I extends SortableAbstract.Option> extend
      * @return 参数是否合法
      */
     protected boolean validationOptionsToMappings(SortableAbstract<?> options, List<Mapper> mappers) {
-        if (mappers == null || mappers.isEmpty() || options == null || options.isEmpty()) {
+        if (mappers == null || mappers.isEmpty()) {
             return false;
+        } else if (options == null || options.isEmpty()) {
+            return true;
         } else {
             for (final Option option : options) {
                 boolean bool = false;

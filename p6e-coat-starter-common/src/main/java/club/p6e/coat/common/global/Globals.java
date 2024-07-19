@@ -18,6 +18,24 @@ public final class Globals {
     private static boolean DEBUG = false;
 
     /**
+     * 语言的信息头
+     */
+    @SuppressWarnings("ALL")
+    private static final String USER_LANGUAGE_HEADER = "P6e-Language";
+
+    /**
+     * 项目的信息头
+     */
+    @SuppressWarnings("ALL")
+    private static final String USER_PROJECT_HEADER = "P6e-User-Project";
+
+    /**
+     * 语言的信息头
+     */
+    @SuppressWarnings("ALL")
+    private static final String USER_ORGANIZATION_HEADER = "P6e-User-Organization";
+
+    /**
      * 用户的信息头
      */
     @SuppressWarnings("ALL")
@@ -46,33 +64,6 @@ public final class Globals {
             }
         }
         return null;
-    }
-
-    public static String getUserInfoContent() {
-        if (BaseController.isServletRequest()) {
-            try {
-                if (DEBUG) {
-                    return JsonUtil.toJson(GlobalUserInfo.DEBUG);
-                } else {
-                    return BaseWebController.getHeader(USER_INFO_HEADER);
-                }
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    public static String getUserProject() {
-        return "20000";
-    }
-
-    public static String getUserOrganization() {
-        return "20000";
-    }
-
-    public static String getLanguage() {
-        return "zh-cn";
     }
 
     public static GlobalUserInfo getUserInfo(ServerHttpRequest request) {
@@ -118,6 +109,78 @@ public final class Globals {
             }
         }
         return null;
+    }
+
+    public static String getUserInfoContent() {
+        if (BaseController.isServletRequest()) {
+            try {
+                if (DEBUG) {
+                    return JsonUtil.toJson(GlobalUserInfo.DEBUG);
+                } else {
+                    return BaseWebController.getHeader(USER_INFO_HEADER);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static String getUserProject() {
+        if (BaseController.isServletRequest()) {
+            try {
+                if (DEBUG) {
+                    return GlobalUserProject.DEBUG.getProject();
+                } else {
+                    return BaseWebController.getHeader(USER_PROJECT_HEADER);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static String getUserProject(ServerHttpRequest request) {
+        return "20000";
+    }
+
+    public static String getUserOrganization() {
+        if (BaseController.isServletRequest()) {
+            try {
+                if (DEBUG) {
+                    return GlobalUserOrganization.DEBUG.getOrganization();
+                } else {
+                    return BaseWebController.getHeader(USER_ORGANIZATION_HEADER);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static String getUserOrganization(ServerHttpRequest request) {
+        return "20000";
+    }
+
+    public static String getLanguage() {
+        if (BaseController.isServletRequest()) {
+            try {
+                if (DEBUG) {
+                    return GlobalUserLanguage.DEBUG.getLanguage();
+                } else {
+                    return BaseWebController.getHeader(USER_LANGUAGE_HEADER);
+                }
+            } catch (Exception e) {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public static String getLanguage(ServerHttpRequest request) {
+        return "zh-cn";
     }
 
 }
