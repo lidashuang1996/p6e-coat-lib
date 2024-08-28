@@ -15,8 +15,8 @@ public class GlobalUserPermission implements Serializable {
 
     public static GlobalUserPermission DEBUG = new GlobalUserPermission();
 
-    public static void setDebug(GlobalUserPermission userPermission) {
-        DEBUG = userPermission;
+    public static void setDebug(GlobalUserPermission debug) {
+        DEBUG = debug;
     }
 
     private Integer uid;

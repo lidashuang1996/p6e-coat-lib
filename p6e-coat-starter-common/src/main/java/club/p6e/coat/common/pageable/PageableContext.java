@@ -22,6 +22,10 @@ public class PageableContext {
         return new PageableContext("1", 1, Integer.MAX_VALUE, PageableContext.class);
     }
 
+    public static PageableContext build(Integer page, Integer size) {
+        return new PageableContext(null, page, size, null);
+    }
+
     public static PageableContext build(String all, Integer page, Integer size, Class<?> source) {
         return new PageableContext(all, page, size, source);
     }

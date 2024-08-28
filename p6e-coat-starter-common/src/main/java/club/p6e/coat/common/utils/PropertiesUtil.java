@@ -209,11 +209,27 @@ public class PropertiesUtil {
                 }).toList();
     }
 
+    @SuppressWarnings("ALL")
     public static Map<String, Object> getMapProperty(Properties properties, String name) {
         final Map<String, Object> result = new HashMap<>();
         final Properties matchProperties = matchProperties(name, properties, true);
-        for (final String n : matchProperties.stringPropertyNames()) {
-            result.put(n, matchProperties.get(n));
+        for (final String item : matchProperties.stringPropertyNames()) {
+            Map<String, Object> tmp = result;
+            final String[] split = item.split("\\.");
+            for (int i = 0; i < split.length; i++) {
+                final String sne = split[i];
+                if (i + 1 == split.length) {
+                    tmp.put(sne, matchProperties.get(item));
+                } else {
+                    if (tmp.containsKey(sne)) {
+                        tmp = (Map<String, Object>) tmp.get(sne);
+                    } else {
+                        final Map<String, Object> data = new HashMap<>();
+                        tmp.put(sne, data);
+                        tmp = data;
+                    }
+                }
+            }
         }
         return result;
     }

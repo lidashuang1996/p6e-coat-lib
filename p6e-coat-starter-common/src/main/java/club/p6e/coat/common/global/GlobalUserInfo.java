@@ -4,8 +4,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author lidashuang
@@ -17,19 +16,24 @@ public class GlobalUserInfo implements Serializable {
 
     public static GlobalUserInfo DEBUG = new GlobalUserInfo();
 
-    public static void setDebug(GlobalUserInfo userInfo) {
-        DEBUG = userInfo;
+    public static void setDebug(GlobalUserInfo debug) {
+        DEBUG = debug;
     }
 
     private Integer id;
     private Integer status;
+    private Integer enabled;
+    private Integer internal;
+    private Integer administrator;
     private String account;
+    private String phone;
+    private String mailbox;
     private String name;
     private String nickname;
     private String avatar;
     private String description;
-    private String phone;
-    private String mailbox;
-    private List<String> marks = new ArrayList<>();
-    private List<String> groups = new ArrayList<>();
+    private String language;
+    private Map<String, Set<String>> organizationalProject = new HashMap<>();
+    private Map<String, Map<String, Set<String>>> permission = new HashMap<>();
+
 }

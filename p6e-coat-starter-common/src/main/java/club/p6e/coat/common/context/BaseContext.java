@@ -30,7 +30,7 @@ public class BaseContext implements Serializable {
         private Integer size;
         private Integer page;
 
-        public PageableContext getPageableContext() {
+        public PageableContext getPageable() {
             return PageableContext.build(this.all, this.page, this.size, this.getClass());
         }
     }
