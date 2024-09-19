@@ -350,6 +350,7 @@ public final class CopyUtil {
             }
             return targetObject;
         } catch (Exception e) {
+            e.printStackTrace();
             return defaultTargetObject;
         }
     }

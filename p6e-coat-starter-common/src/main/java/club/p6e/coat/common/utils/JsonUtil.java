@@ -103,9 +103,8 @@ public final class JsonUtil {
         @Override
         public <T> T fromJson(String json, Class<T> tClass) {
             try {
-                return om.readValue(json, tClass);
+                return json == null ? null : om.readValue(json, tClass);
             } catch (Exception e) {
-                e.printStackTrace();
                 return null;
             }
         }

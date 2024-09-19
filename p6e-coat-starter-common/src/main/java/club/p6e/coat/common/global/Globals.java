@@ -4,6 +4,7 @@ import club.p6e.coat.common.controller.BaseController;
 import club.p6e.coat.common.controller.BaseWebController;
 import club.p6e.coat.common.controller.BaseWebFluxController;
 import club.p6e.coat.common.utils.JsonUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
@@ -49,6 +50,22 @@ public final class Globals {
 
     public static void setDebug() {
         DEBUG = true;
+    }
+
+    private static final ThreadLocal<String> PROJECT_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<String> ORGANIZATION_THREAD_LOCAL = new ThreadLocal<>();
+
+    public static void setUserProject(String project) {
+        PROJECT_THREAD_LOCAL.set(project);
+    }
+
+    public static void setUserOrganization(String organization) {
+        ORGANIZATION_THREAD_LOCAL.set(organization);
+    }
+
+    public static void clean() {
+        PROJECT_THREAD_LOCAL.remove();
+        ORGANIZATION_THREAD_LOCAL.remove();
     }
 
     public static GlobalUserInfo getUserInfo() {
@@ -126,13 +143,21 @@ public final class Globals {
         return null;
     }
 
+    public static void remove() {
+
+    }
+
     public static String getUserProject() {
         if (BaseController.isServletRequest()) {
             try {
                 if (DEBUG) {
                     return GlobalUserProject.DEBUG.getProject();
                 } else {
-                    return BaseWebController.getHeader(USER_PROJECT_HEADER);
+                    String result = PROJECT_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebController.getHeader(USER_PROJECT_HEADER);
+                    }
+                    return result;
                 }
             } catch (Exception e) {
                 return null;
@@ -151,7 +176,11 @@ public final class Globals {
                 if (DEBUG) {
                     return GlobalUserOrganization.DEBUG.getOrganization();
                 } else {
-                    return BaseWebController.getHeader(USER_ORGANIZATION_HEADER);
+                    String result = ORGANIZATION_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebController.getHeader(USER_ORGANIZATION_HEADER);
+                    }
+                    return result;
                 }
             } catch (Exception e) {
                 return null;
