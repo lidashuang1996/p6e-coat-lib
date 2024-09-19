@@ -43,7 +43,7 @@ public class BaseContext implements Serializable {
         private Integer page;
         private List<String> extension;
 
-        public PageableContext getPageableContext() {
+        public PageableContext getPageable() {
             return PageableContext.build(this.all, this.page, this.size, this.getClass());
         }
     }
