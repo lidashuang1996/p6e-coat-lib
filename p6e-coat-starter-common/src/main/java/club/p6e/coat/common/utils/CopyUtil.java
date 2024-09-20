@@ -153,6 +153,8 @@ public final class CopyUtil {
         try {
             final Class<?> sourceClass = sourceObject.getClass();
             final Class<?> targetClass = targetObject.getClass();
+
+
             final Field[] sourceFields = getFields(sourceClass);
             final Field[] targetFields = getFields(targetClass);
             for (final Field sourceField : sourceFields) {
@@ -901,7 +903,7 @@ public final class CopyUtil {
      * @param clazz class 类型
      * @return 是否接口 java.io.Serializable
      */
-    private static boolean isSupportSerializable(Class<?> clazz) {
+    public static boolean isSupportSerializable(Class<?> clazz) {
         final Class<?>[] cls = clazz.getInterfaces();
         if (clazz == Map.class || clazz == List.class) {
             return true;
