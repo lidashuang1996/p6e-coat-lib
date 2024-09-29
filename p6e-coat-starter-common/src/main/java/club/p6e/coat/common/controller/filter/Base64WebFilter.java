@@ -50,9 +50,6 @@ public class Base64WebFilter implements Filter {
         while (enumeration.hasMoreElements()) {
             final String name = enumeration.nextElement();
             if (name != null && name.toLowerCase().startsWith("p6e-")) {
-                System.out.println("name ->> " + name);
-                System.out.println("value ->> " + request.getHeader(name));
-                System.out.println("base64 -> " + new String(Base64.getDecoder().decode(request.getHeader(name)), StandardCharsets.UTF_8));
                 customHttpServletRequest.addHeader(name,
                         new String(Base64.getDecoder().decode(
                                 request.getHeader(name)), StandardCharsets.UTF_8));
@@ -66,7 +63,7 @@ public class Base64WebFilter implements Filter {
      */
     @Override
     public void destroy() {
-        LOGGER.info("filter [ " + this.getClass() + " ] destroy complete !!");
+        LOGGER.info("filter [ {} ] destroy complete !!", this.getClass());
     }
 
 

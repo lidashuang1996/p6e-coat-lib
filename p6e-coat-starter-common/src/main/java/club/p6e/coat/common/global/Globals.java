@@ -157,7 +157,7 @@ public final class Globals {
                     if (result == null) {
                         result = BaseWebController.getHeader(USER_PROJECT_HEADER);
                     }
-                    return result;
+                    return (result == null || result.isEmpty()) ? null : result;
                 }
             } catch (Exception e) {
                 return null;
@@ -180,7 +180,7 @@ public final class Globals {
                     if (result == null) {
                         result = BaseWebController.getHeader(USER_ORGANIZATION_HEADER);
                     }
-                    return result;
+                    return (result == null || result.isEmpty()) ? null : result;
                 }
             } catch (Exception e) {
                 return null;

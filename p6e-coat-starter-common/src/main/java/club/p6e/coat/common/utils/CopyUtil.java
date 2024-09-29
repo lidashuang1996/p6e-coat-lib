@@ -827,6 +827,27 @@ public final class CopyUtil {
         }
     }
 
+    public static Map<String, Object> objectToMap(Object source, Map<String, Object> defaultTargetObject) {
+        if (source == null
+                || isMapType(source.getClass())
+                || isCollectionType(source.getClass())) {
+            return defaultTargetObject;
+        } else {
+            try {
+                final Map<String, Object> result = new HashMap<>();
+                final Class<?> sourceClass = source.getClass();
+                for (final Field field : getFields(sourceClass)) {
+                    field.setAccessible(true);
+                    result.put(field.getName(), field.get(source));
+                }
+                return result;
+            } catch (Exception ignore) {
+                // ignore
+                return defaultTargetObject;
+            }
+        }
+    }
+
     /**
      * 判断是否为基础类型
      *
