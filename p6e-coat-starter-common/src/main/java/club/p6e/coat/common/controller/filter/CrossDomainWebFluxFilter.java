@@ -25,6 +25,7 @@ import java.util.List;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class CrossDomainWebFluxFilter implements WebFilter {
 
     /**
@@ -146,4 +147,5 @@ public class CrossDomainWebFluxFilter implements WebFilter {
         }
         return false;
     }
+
 }

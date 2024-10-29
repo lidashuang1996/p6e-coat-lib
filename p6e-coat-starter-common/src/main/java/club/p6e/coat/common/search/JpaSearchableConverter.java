@@ -41,6 +41,12 @@ public class JpaSearchableConverter {
             return builder.equal(root.get(option.getKey()).as(String.class), option.getValue());
         }
         if (SearchableAbstract
+                .NOT_EQUAL_OPTION_CONDITION
+                .equalsIgnoreCase(option.getCondition())
+                && option.getValue() != null) {
+            return builder.notEqual(root.get(option.getKey()).as(String.class), option.getValue());
+        }
+        if (SearchableAbstract
                 .GREATER_THAN_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
@@ -99,15 +105,16 @@ public class JpaSearchableConverter {
                 }
                 if (option != null && list != null) {
                     if (SearchableAbstract.OR_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
-                        predicates.add(builder.or(execute(root, builder, list).toArray(new Predicate[0])));
+                        final Predicate a3 = builder.or(execute(root, builder, list).toArray(new Predicate[0]));
+                        predicates.add(a3);
                     }
                     if (SearchableAbstract.AND_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
-                        predicates.add(builder.and(execute(root, builder, list).toArray(new Predicate[0])));
+                        final Predicate a4 = builder.or(execute(root, builder, list).toArray(new Predicate[0]));
+                        predicates.add(a4);
                     }
                 }
             }
         }
         return predicates;
     }
-
 }

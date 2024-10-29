@@ -88,5 +88,6 @@ public final class ResultContext implements Serializable {
         this.message = message;
         this.data = data;
     }
+
 }
 

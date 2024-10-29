@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class CrossDomainWebFilter implements Filter {
 
     /**

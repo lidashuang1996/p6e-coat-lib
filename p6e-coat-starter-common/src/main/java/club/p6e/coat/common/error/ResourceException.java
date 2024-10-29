@@ -1,7 +1,8 @@
 package club.p6e.coat.common.error;
 
 /**
- * CustomException / AuthStateException
+ * 自定义异常
+ * 资源异常
  *
  * @author lidashuang
  * @version 1.0
@@ -11,15 +12,15 @@ public class ResourceException extends CustomException {
     /**
      * 默认的代码
      */
-    public static final int DEFAULT_CODE = 11900;
+    public static final int DEFAULT_CODE = 100000;
 
     /**
      * 默认的简述
      */
-    private static final String DEFAULT_SKETCH = "AUTH_STATE_EXCEPTION";
+    private static final String DEFAULT_SKETCH = "RESOURCE_EXCEPTION";
 
     /**
-     * AuthStateException
+     * 类型不匹配异常
      *
      * @param sc      源 class
      * @param error   异常对象
@@ -30,7 +31,7 @@ public class ResourceException extends CustomException {
     }
 
     /**
-     * AuthStateException
+     * 类型不匹配异常
      *
      * @param sc        源 class
      * @param throwable 异常对象
@@ -41,7 +42,7 @@ public class ResourceException extends CustomException {
     }
 
     /**
-     * AuthStateException
+     * 类型不匹配异常
      *
      * @param sc      源 class
      * @param error   异常内容
@@ -54,7 +55,7 @@ public class ResourceException extends CustomException {
     }
 
     /**
-     * AuthStateException
+     * 类型不匹配异常
      *
      * @param sc        源 class
      * @param throwable 异常对象
@@ -65,4 +66,5 @@ public class ResourceException extends CustomException {
     public ResourceException(Class<?> sc, Throwable throwable, int code, String sketch, String content) {
         super(sc, ResourceException.class, throwable, code, sketch, content);
     }
+
 }

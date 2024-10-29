@@ -4,9 +4,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * Base Controller
+ *
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class BaseController {
 
     public static String AUTH_HEADER = "Authorization";

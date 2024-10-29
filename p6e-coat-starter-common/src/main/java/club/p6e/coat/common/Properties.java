@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * Properties
+ *
  * @author lidashuang
  * @version 1.0
  */
@@ -25,21 +27,10 @@ public class Properties implements Serializable {
     private String version = "unknown";
 
     /**
-     * 安全
+     * Security
      */
-    private Security security = new Security();
-
-    /**
-     * 安全
-     */
-    private CrossDomain crossDomain = new CrossDomain();
-
-    /**
-     * 雪花
-     */
-    private Map<String, Snowflake> snowflake = new HashMap<>();
-
     @Data
+    @Accessors(chain = true)
     public static class Security implements Serializable {
 
         /**
@@ -53,6 +44,11 @@ public class Properties implements Serializable {
         private String[] vouchers = new String[]{};
 
     }
+
+    /**
+     * 安全
+     */
+    private Security security = new Security();
 
     /**
      * Cross Domain
@@ -71,9 +67,24 @@ public class Properties implements Serializable {
         private String[] whiteList = new String[]{};
     }
 
+    /**
+     * 安全
+     */
+    private CrossDomain crossDomain = new CrossDomain();
+
+    /**
+     * Snowflake
+     */
     @Data
+    @Accessors(chain = true)
     public static class Snowflake implements Serializable {
         private Integer workerId;
         private Integer dataCenterId;
     }
+
+    /**
+     * 雪花
+     */
+    private Map<String, Snowflake> snowflake = new HashMap<>();
+
 }

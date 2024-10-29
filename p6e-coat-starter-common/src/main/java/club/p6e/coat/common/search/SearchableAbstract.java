@@ -55,6 +55,7 @@ public abstract class SearchableAbstract<I extends SearchableAbstract.Option> ex
     public static final String OR_RELATIONSHIP_TYPE = "OR";
     public static final String AND_RELATIONSHIP_TYPE = "AND";
     public static final String EQUAL_OPTION_CONDITION = "=";
+    public static final String NOT_EQUAL_OPTION_CONDITION = "!=";
     public static final String GREATER_THAN_OPTION_CONDITION = ">";
     public static final String GREATER_THAN_OR_EQUAL_OPTION_CONDITION = ">=";
     public static final String LESS_THAN_OPTION_CONDITION = "<";
@@ -64,6 +65,7 @@ public abstract class SearchableAbstract<I extends SearchableAbstract.Option> ex
     public static final String LIKE_OPTION_CONDITION = "LIKE";
     public static final List<String> CONDITION_LIST = List.of(
             EQUAL_OPTION_CONDITION,
+            NOT_EQUAL_OPTION_CONDITION,
             GREATER_THAN_OPTION_CONDITION,
             GREATER_THAN_OR_EQUAL_OPTION_CONDITION,
             LESS_THAN_OPTION_CONDITION,

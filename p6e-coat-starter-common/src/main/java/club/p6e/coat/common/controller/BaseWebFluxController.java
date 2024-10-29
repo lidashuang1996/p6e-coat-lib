@@ -7,9 +7,12 @@ import org.springframework.web.server.ServerWebExchange;
 import java.util.List;
 
 /**
+ * Base Web Flux Controller
+ *
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class BaseWebFluxController extends BaseController {
 
     /**

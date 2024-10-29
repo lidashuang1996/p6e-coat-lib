@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class VoucherWebFilter implements Filter {
 
     /**
@@ -64,7 +65,7 @@ public class VoucherWebFilter implements Filter {
      */
     @Override
     public void init(FilterConfig config) {
-        LOGGER.info("filter [ " + this.getClass() + " ] init complete ...");
+        LOGGER.info("FILTER [ {} ] INIT COMPLETE ...", this.getClass());
     }
 
     /**
@@ -104,7 +105,7 @@ public class VoucherWebFilter implements Filter {
      */
     @Override
     public void destroy() {
-        LOGGER.info("filter [ " + this.getClass() + " ] destroy complete !!");
+        LOGGER.info("FILTER [ {} ] DESTROY COMPLETE !!", this.getClass());
     }
 
 }

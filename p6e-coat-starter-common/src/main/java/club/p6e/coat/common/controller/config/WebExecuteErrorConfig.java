@@ -45,6 +45,7 @@ public final class WebExecuteErrorConfig {
             super(HttpRequestMethodNotSupportedException.class, ExtendException1.class,
                     "HTTP_REQUEST_METHOD_NOT_SUPPORTED_EXCEPTION", DEFAULT_CODE, DEFAULT_SKETCH, "不支持的请求方法");
         }
+
     }
 
 }

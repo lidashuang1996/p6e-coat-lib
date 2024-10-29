@@ -4,6 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
@@ -485,13 +490,77 @@ public final class FileUtil {
         return sb.toString();
     }
 
-    public static boolean verificationSuffix(String content, List<String> suffixes) {
+    public static boolean checkSuffix(String content, List<String> suffixes) {
         final String suffx = getSuffix(name(content));
         if (suffx == null || suffixes == null || suffixes.isEmpty()) {
             return false;
         } else {
             return suffixes.contains(suffx);
         }
+    }
+
+    private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+
+    public static String resourceToDatePath(File file) {
+        if (file != null && checkFileExist(file)) {
+            final String suffix = getSuffix(file.getName());
+            if (suffix != null) {
+                return composePath(DTF.format(LocalDateTime.now()), composeFile(GeneratorUtil.uuid(), suffix));
+            }
+        }
+        return null;
+    }
+
+    public static String resourceToMd5Path(File file) {
+        if (file != null && checkFileExist(file)) {
+            final String suffix = getSuffix(file.getName());
+            if (suffix != null) {
+                try (InputStream fis = new FileInputStream(file)) {
+                    MessageDigest md = MessageDigest.getInstance("MD5");
+                    byte[] bytes = new byte[1024];
+                    int nread;
+
+                    while ((nread = fis.read(bytes)) != -1) {
+                        md.update(bytes, 0, nread);
+                    }
+
+                    byte[] mBytes = md.digest();
+                    final StringBuilder result = new StringBuilder();
+                    for (final byte m : mBytes) {
+                        result.append(String.format("%02x", m));
+                    }
+                    return composePath(
+                            composePath(result.substring(0, 8), result.substring(8, 16)),
+                            composeFile(result.substring(16), suffix)
+                    );
+                } catch (Exception e) {
+                    return null;
+                }
+            }
+        }
+        return null;
+    }
+
+    public static boolean move(File source, String path) {
+        return move(source, path, false);
+    }
+
+    public static boolean move(File source, String path, boolean isDeleteExistTarget) {
+        final File target = new File(path);
+        if (checkFileExist(source)) {
+            if (checkFileExist(target)) {
+                if (isDeleteExistTarget) {
+                    target.delete();
+                } else {
+                    return true;
+                }
+            }
+            if (!checkFolderExist(target.getParentFile())) {
+                createFolder(target.getParentFile());
+            }
+            return source.renameTo(target);
+        }
+        return false;
     }
 
 }

@@ -9,9 +9,12 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.util.Enumeration;
 
 /**
+ * Base Web Controller
+ *
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class BaseWebController extends BaseController {
 
     /**

@@ -18,7 +18,7 @@ public abstract class CustomException extends RuntimeException {
      * 转型器缓存
      */
     private static final Map<Class<? extends Exception>,
-            CustomException> TRANSFORMER_CACHE = new ConcurrentHashMap<>();
+                CustomException> TRANSFORMER_CACHE = new ConcurrentHashMap<>();
 
     /**
      * 代码

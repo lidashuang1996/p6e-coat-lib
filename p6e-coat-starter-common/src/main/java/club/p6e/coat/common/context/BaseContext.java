@@ -15,6 +15,7 @@ import java.util.Map;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class BaseContext implements Serializable {
 
     @Data

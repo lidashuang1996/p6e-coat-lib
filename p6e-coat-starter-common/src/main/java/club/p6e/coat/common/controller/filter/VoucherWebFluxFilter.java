@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class VoucherWebFluxFilter implements WebFilter {
 
     /**
@@ -75,4 +76,5 @@ public class VoucherWebFluxFilter implements WebFilter {
             return chain.filter(exchange);
         }
     }
+
 }

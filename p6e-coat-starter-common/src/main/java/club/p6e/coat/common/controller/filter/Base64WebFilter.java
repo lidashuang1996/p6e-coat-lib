@@ -11,11 +11,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * 凭证认证过滤器
+ * BASE64 过滤器
  *
  * @author lidashuang
  * @version 1.0
  */
+@SuppressWarnings("ALL")
 public class Base64WebFilter implements Filter {
 
     /**
@@ -30,7 +31,7 @@ public class Base64WebFilter implements Filter {
      */
     @Override
     public void init(FilterConfig config) {
-        LOGGER.info("filter [ " + this.getClass() + " ] init complete ...");
+        LOGGER.info("FILTER [ {} ] INIT COMPLETE ...", this.getClass());
     }
 
     /**
@@ -63,13 +64,22 @@ public class Base64WebFilter implements Filter {
      */
     @Override
     public void destroy() {
-        LOGGER.info("filter [ {} ] destroy complete !!", this.getClass());
+        LOGGER.info("FILTER [ {} ] DESTROY COMPLETE !!", this.getClass());
     }
 
 
+    /**
+     * Custom Http Servlet Request
+     */
     private static class CustomHttpServletRequest extends HttpServletRequestWrapper {
+
         private final Map<String, String> headers = new HashMap<>();
 
+        /**
+         * 构造方法初始化
+         *
+         * @param request HttpServletRequest 对象
+         */
         public CustomHttpServletRequest(HttpServletRequest request) {
             super(request);
         }
@@ -94,6 +104,7 @@ public class Base64WebFilter implements Filter {
         public void addHeader(String name, String value) {
             this.headers.put(name, value);
         }
+
     }
 
 }
