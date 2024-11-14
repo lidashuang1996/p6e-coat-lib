@@ -13,15 +13,16 @@ public abstract class VerifiableCustomAchieve implements VerifiableAchieveInterf
     public boolean execute(Annotation annotation, Field field, Object data) {
         if (annotation instanceof VerifiableCustom custom) {
             try {
-                return execute(field.get(data), custom.value());
+                field.setAccessible(true);
+                return execute(custom.value(), field.get(data));
             } catch (Exception ignored) {
-                // ignored
+                // ignored exception
             }
         }
         return false;
     }
 
-    public boolean execute(Object data, String content) {
+    public boolean execute(String content, Object data) {
         return false;
     }
 

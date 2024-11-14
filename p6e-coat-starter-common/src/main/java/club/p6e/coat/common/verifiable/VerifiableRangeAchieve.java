@@ -13,6 +13,7 @@ public class VerifiableRangeAchieve implements VerifiableAchieveInterface {
     public boolean execute(Annotation annotation, Field field, Object data) {
         if (annotation instanceof VerifiableRange range) {
             try {
+                field.setAccessible(true);
                 final String[] list = range.value();
                 final Object value = field.get(data);
                 if (value instanceof String string) {
@@ -30,7 +31,7 @@ public class VerifiableRangeAchieve implements VerifiableAchieveInterface {
                     }
                 }
             } catch (Exception ignored) {
-                // ignored
+                // ignored exception
             }
         }
         return false;

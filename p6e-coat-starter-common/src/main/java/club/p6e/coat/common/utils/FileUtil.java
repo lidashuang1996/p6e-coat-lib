@@ -502,10 +502,17 @@ public final class FileUtil {
     private static final DateTimeFormatter DTF = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     public static String resourceToDatePath(File file) {
+        return resourceToDatePath(file, true);
+    }
+
+    public static String resourceToDatePath(File file, boolean isRandomName) {
         if (file != null && checkFileExist(file)) {
             final String suffix = getSuffix(file.getName());
             if (suffix != null) {
-                return composePath(DTF.format(LocalDateTime.now()), composeFile(GeneratorUtil.uuid(), suffix));
+                return composePath(
+                        DTF.format(LocalDateTime.now()),
+                        isRandomName ? composeFile(GeneratorUtil.uuid(), suffix) : composePath(GeneratorUtil.uuid(), file.getName())
+                );
             }
         }
         return null;

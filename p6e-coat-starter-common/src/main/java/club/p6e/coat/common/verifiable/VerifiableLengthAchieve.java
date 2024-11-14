@@ -13,16 +13,18 @@ public class VerifiableLengthAchieve implements VerifiableAchieveInterface {
     public boolean execute(Annotation annotation, Field field, Object data) {
         if (annotation instanceof VerifiableLength length) {
             try {
+                field.setAccessible(true);
                 final Object value = field.get(data);
-                if (value instanceof String string) {
-                    final int min = length.min();
-                    final int max = length.max();
-                    if (string.length() >= min && string.length() <= max) {
-                        return true;
-                    }
+                if (length.isAllowNull() && value == null) {
+                    return true;
+                }
+                final int min = length.min();
+                final int max = length.max();
+                if (value instanceof String string && string.length() >= min && string.length() <= max) {
+                    return true;
                 }
             } catch (Exception ignored) {
-                // ignored
+                // ignored exception
             }
         }
         return false;

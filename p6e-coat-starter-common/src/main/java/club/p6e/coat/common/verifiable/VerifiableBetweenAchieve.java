@@ -13,16 +13,17 @@ public class VerifiableBetweenAchieve implements VerifiableAchieveInterface {
     public boolean execute(Annotation annotation, Field field, Object data) {
         if (annotation instanceof VerifiableBetween between) {
             try {
+                field.setAccessible(true);
                 final Object value = field.get(data);
                 final double min = between.min();
                 final double max = between.max();
-                if (value instanceof Number number) {
-                    if (number.doubleValue() >= min && number.doubleValue() <= max) {
-                        return true;
-                    }
+                if (value instanceof Number number
+                        && number.doubleValue() >= min
+                        && number.doubleValue() <= max) {
+                    return true;
                 }
             } catch (Exception ignored) {
-                // ignored
+                // ignored exception
             }
         }
         return false;

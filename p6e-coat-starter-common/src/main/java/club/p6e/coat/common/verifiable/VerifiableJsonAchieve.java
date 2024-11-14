@@ -15,12 +15,14 @@ public class VerifiableJsonAchieve implements VerifiableAchieveInterface {
     public boolean execute(Annotation annotation, Field field, Object data) {
         if (annotation instanceof VerifiableJson) {
             try {
+                field.setAccessible(true);
                 final Object value = field.get(data);
                 if (value instanceof String string) {
                     JsonUtil.fromJsonToMap(string, Object.class, Object.class);
+                    return true;
                 }
             } catch (Exception ignored) {
-                // ignored
+                // ignored exception
             }
         }
         return false;

@@ -4,7 +4,6 @@ import club.p6e.coat.common.controller.BaseController;
 import club.p6e.coat.common.controller.BaseWebController;
 import club.p6e.coat.common.controller.BaseWebFluxController;
 import club.p6e.coat.common.utils.JsonUtil;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 
 /**
@@ -52,8 +51,19 @@ public final class Globals {
         DEBUG = true;
     }
 
+    private static final ThreadLocal<String> USER_THREAD_LOCAL = new ThreadLocal<>();
+    private static final ThreadLocal<String> PERMISSION_THREAD_LOCAL = new ThreadLocal<>();
     private static final ThreadLocal<String> PROJECT_THREAD_LOCAL = new ThreadLocal<>();
     private static final ThreadLocal<String> ORGANIZATION_THREAD_LOCAL = new ThreadLocal<>();
+
+
+    public static void setUser(String user) {
+        USER_THREAD_LOCAL.set(user);
+    }
+
+    public static void setUserPermission(String permission) {
+        PERMISSION_THREAD_LOCAL.set(permission);
+    }
 
     public static void setUserProject(String project) {
         PROJECT_THREAD_LOCAL.set(project);
@@ -64,6 +74,8 @@ public final class Globals {
     }
 
     public static void clean() {
+        USER_THREAD_LOCAL.remove();
+        PERMISSION_THREAD_LOCAL.remove();
         PROJECT_THREAD_LOCAL.remove();
         ORGANIZATION_THREAD_LOCAL.remove();
     }
@@ -74,7 +86,11 @@ public final class Globals {
                 if (DEBUG) {
                     return GlobalUserInfo.DEBUG;
                 } else {
-                    return JsonUtil.fromJson(BaseWebController.getHeader(USER_INFO_HEADER), GlobalUserInfo.class);
+                    String result = USER_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebController.getHeader(USER_INFO_HEADER);
+                    }
+                    return (result == null || result.isEmpty()) ? null : JsonUtil.fromJson(result, GlobalUserInfo.class);
                 }
             } catch (Exception e) {
                 return null;
@@ -89,7 +105,11 @@ public final class Globals {
                 if (DEBUG) {
                     return GlobalUserInfo.DEBUG;
                 } else {
-                    return JsonUtil.fromJson(BaseWebFluxController.getHeader(request, USER_INFO_HEADER), GlobalUserInfo.class);
+                    String result = USER_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebFluxController.getHeader(request, USER_INFO_HEADER);
+                    }
+                    return (result == null || result.isEmpty()) ? null : JsonUtil.fromJson(result, GlobalUserInfo.class);
                 }
             } catch (Exception e) {
                 return null;
@@ -98,13 +118,27 @@ public final class Globals {
         return null;
     }
 
+    public static String getUserInfoContent() {
+        final GlobalUserInfo data = getUserInfo();
+        return data == null ? null : JsonUtil.toJson(data);
+    }
+
+    public static String getUserInfoContent(ServerHttpRequest request) {
+        final GlobalUserInfo data = getUserInfo(request);
+        return data == null ? null : JsonUtil.toJson(data);
+    }
+
     public static GlobalUserPermission getUserPermission() {
         if (BaseController.isServletRequest()) {
             try {
                 if (DEBUG) {
                     return GlobalUserPermission.DEBUG;
                 } else {
-                    return JsonUtil.fromJson(BaseWebController.getHeader(USER_INFO_PERMISSION), GlobalUserPermission.class);
+                    String result = PERMISSION_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebController.getHeader(USER_INFO_PERMISSION);
+                    }
+                    return (result == null || result.isEmpty()) ? null : JsonUtil.fromJson(result, GlobalUserPermission.class);
                 }
             } catch (Exception e) {
                 return null;
@@ -119,32 +153,17 @@ public final class Globals {
                 if (DEBUG) {
                     return GlobalUserPermission.DEBUG;
                 } else {
-                    return JsonUtil.fromJson(BaseWebFluxController.getHeader(request, USER_INFO_PERMISSION), GlobalUserPermission.class);
+                    String result = PERMISSION_THREAD_LOCAL.get();
+                    if (result == null) {
+                        result = BaseWebFluxController.getHeader(request, USER_INFO_PERMISSION);
+                    }
+                    return (result == null || result.isEmpty()) ? null : JsonUtil.fromJson(result, GlobalUserPermission.class);
                 }
             } catch (Exception e) {
                 return null;
             }
         }
         return null;
-    }
-
-    public static String getUserInfoContent() {
-        if (BaseController.isServletRequest()) {
-            try {
-                if (DEBUG) {
-                    return JsonUtil.toJson(GlobalUserInfo.DEBUG);
-                } else {
-                    return BaseWebController.getHeader(USER_INFO_HEADER);
-                }
-            } catch (Exception e) {
-                return null;
-            }
-        }
-        return null;
-    }
-
-    public static void remove() {
-
     }
 
     public static String getUserProject() {
