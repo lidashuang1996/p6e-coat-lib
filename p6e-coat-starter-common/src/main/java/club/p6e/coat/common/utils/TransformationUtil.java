@@ -19,7 +19,7 @@ public final class TransformationUtil {
         if (o == null) {
             return null;
         } else {
-            return Double.valueOf(String.valueOf(o)).intValue();
+            return o instanceof Integer ? (Integer) o : Double.valueOf(String.valueOf(o)).intValue();
         }
     }
 
@@ -27,7 +27,24 @@ public final class TransformationUtil {
         if (o == null) {
             return null;
         } else {
-            return Double.valueOf(String.valueOf(o)).longValue();
+            return o instanceof Long ? (Long) o : Double.valueOf(String.valueOf(o)).longValue();
+        }
+    }
+
+
+    public static Double objectToDouble(Object o) {
+        if (o == null) {
+            return null;
+        } else {
+            return o instanceof Double ? (Double) o : Double.valueOf(String.valueOf(o));
+        }
+    }
+
+    public static Float objectToFloat(Object o) {
+        if (o == null) {
+            return null;
+        } else {
+            return o instanceof Float ? (Float) o : Double.valueOf(String.valueOf(o)).floatValue();
         }
     }
 
@@ -35,7 +52,7 @@ public final class TransformationUtil {
         if (o == null) {
             return null;
         } else {
-            return String.valueOf(o);
+            return o instanceof String ? (String) o : String.valueOf(o);
         }
     }
 
