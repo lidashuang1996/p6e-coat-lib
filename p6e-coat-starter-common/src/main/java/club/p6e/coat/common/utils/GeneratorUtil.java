@@ -31,6 +31,19 @@ public final class GeneratorUtil {
          */
         public String random(int len, boolean isLetter, boolean isCase);
 
+
+        public String password(int len, char[] source);
+
+        public default String password(int len) {
+            return password(len, new char[]{
+                    '2', '3', '4', '5', '6', '7', '8', '9',
+                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'j', 'k', 'm',
+                    'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
+                    'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                    '!', '@', '#', '$', '%', '^', '&', '*', '+', '-'
+            });
+        }
     }
 
     /**
@@ -60,6 +73,18 @@ public final class GeneratorUtil {
             final int base = isLetter ? (isCase ? 62 : 36) : 10;
             for (int i = 0; i < len; i++) {
                 sb.append(BASE_DATA[ThreadLocalRandom.current().nextInt(base)]);
+            }
+            return sb.toString();
+        }
+
+        @Override
+        public String password(int len, char[] source) {
+            if (source == null || source.length == 0) {
+                return random(len, true, true);
+            }
+            final StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < len; i++) {
+                sb.append(source[ThreadLocalRandom.current().nextInt(source.length)]);
             }
             return sb.toString();
         }
@@ -105,6 +130,14 @@ public final class GeneratorUtil {
      */
     public static String random(int len, boolean isLetter, boolean isCase) {
         return DEFINITION.random(len, isLetter, isCase);
+    }
+
+    public static String password(int len) {
+        return DEFINITION.password(len);
+    }
+
+    public static String password(int len, char[] source) {
+        return DEFINITION.password(len, source);
     }
 
 }

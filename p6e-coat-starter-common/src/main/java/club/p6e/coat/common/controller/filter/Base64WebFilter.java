@@ -45,18 +45,7 @@ public class Base64WebFilter implements Filter {
      */
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain chain) throws IOException, ServletException {
-        final HttpServletRequest request = (HttpServletRequest) servletRequest;
-        final Enumeration<String> enumeration = request.getHeaderNames();
-        final CustomHttpServletRequest customHttpServletRequest = new CustomHttpServletRequest(request);
-        while (enumeration.hasMoreElements()) {
-            final String name = enumeration.nextElement();
-            if (name != null && name.toLowerCase().startsWith("p6e-")) {
-                customHttpServletRequest.addHeader(name,
-                        new String(Base64.getDecoder().decode(
-                                request.getHeader(name)), StandardCharsets.UTF_8));
-            }
-        }
-        chain.doFilter(customHttpServletRequest, servletResponse);
+        chain.doFilter(new CustomHttpServletRequest((HttpServletRequest) servletRequest), servletResponse);
     }
 
     /**
@@ -82,23 +71,25 @@ public class Base64WebFilter implements Filter {
          */
         public CustomHttpServletRequest(HttpServletRequest request) {
             super(request);
+            final Enumeration<String> enumeration = request.getHeaderNames();
+            while (enumeration.hasMoreElements()) {
+                final String name = enumeration.nextElement();
+                if (name != null && name.toLowerCase().startsWith("p6e-")) {
+                    addHeader(name.toLowerCase(), new String(Base64.getDecoder().decode(request.getHeader(name)), StandardCharsets.UTF_8));
+                } else {
+                    addHeader(name.toLowerCase(), request.getHeader(name));
+                }
+            }
         }
 
         @Override
         public String getHeader(String name) {
-            final String value = headers.get(name);
-            if (value != null) {
-                return value;
-            }
-            return super.getHeader(name);
+            return headers.get(name.toLowerCase());
         }
 
         @Override
         public Enumeration<String> getHeaderNames() {
-            Enumeration<String> originalHeaders = super.getHeaderNames();
-            List<String> combinedHeaders = Collections.list(originalHeaders);
-            combinedHeaders.addAll(headers.keySet());
-            return Collections.enumeration(combinedHeaders);
+            return Collections.enumeration(headers.keySet());
         }
 
         public void addHeader(String name, String value) {

@@ -1,9 +1,7 @@
 package club.p6e.coat.common.search;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Predicate;
-import jakarta.persistence.criteria.Root;
+import jakarta.persistence.criteria.*;
+import org.hibernate.query.sqm.tree.domain.SqmPath;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,18 +20,27 @@ public class JpaSearchableConverter {
         execute(root, query, builder, context, predicate);
     }
 
-    private static void execute(Root<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context, Predicate predicate) {
+    public static void injectSearch(Path<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context) {
+        execute(root, query, builder, context, null);
+    }
+
+    public static void injectSearch(Path<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context, Predicate predicate) {
+        execute(root, query, builder, context, predicate);
+    }
+
+    public static void execute(Path<?> root, CriteriaQuery<?> query, CriteriaBuilder builder, SearchableContext context, Predicate predicate) {
         final List<Predicate> predicates = new ArrayList<>();
         if (predicate != null) {
             predicates.add(predicate);
         }
-        if (context != null && !context.isEmpty()) {
-            predicates.addAll(execute(root, builder, SearchableContext.extractOptions(context)));
+        if (context != null && !context.isEmpty() && root instanceof SqmPath<?> path) {
+            predicates.add(builder.and(execute(path, builder,
+                    SearchableContext.extractOptions(context)).toArray(new Predicate[0])));
         }
         query.where(predicates.toArray(new Predicate[0]));
     }
 
-    private static Predicate execute(Root<?> root, CriteriaBuilder builder, SearchableAbstract.Option option) {
+    public static Predicate execute(Path<?> root, CriteriaBuilder builder, SearchableAbstract.Option option) {
         if (SearchableAbstract
                 .EQUAL_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
@@ -84,12 +91,12 @@ public class JpaSearchableConverter {
                 .LIKE_OPTION_CONDITION
                 .equalsIgnoreCase(option.getCondition())
                 && option.getValue() != null) {
-            return builder.like(root.get(option.getKey()).as(String.class), option.getValue());
+            return builder.like(builder.lower(root.get(option.getKey()).as(String.class)), option.getValue().toLowerCase());
         }
         return builder.and();
     }
 
-    private static List<Predicate> execute(Root<?> root, CriteriaBuilder builder, List<SearchableAbstract.Mixin> mixins) {
+    public static List<Predicate> execute(Path<?> root, CriteriaBuilder builder, List<SearchableAbstract.Mixin> mixins) {
         final List<Predicate> predicates = new ArrayList<>();
         if (mixins != null) {
             for (final SearchableAbstract.Mixin mixin : mixins) {
@@ -105,16 +112,15 @@ public class JpaSearchableConverter {
                 }
                 if (option != null && list != null) {
                     if (SearchableAbstract.OR_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
-                        final Predicate a3 = builder.or(execute(root, builder, list).toArray(new Predicate[0]));
-                        predicates.add(a3);
+                        predicates.add(builder.or(execute(root, builder, list).toArray(new Predicate[0])));
                     }
                     if (SearchableAbstract.AND_RELATIONSHIP_TYPE.equals(option.getRelationship())) {
-                        final Predicate a4 = builder.or(execute(root, builder, list).toArray(new Predicate[0]));
-                        predicates.add(a4);
+                        predicates.add(builder.and(execute(root, builder, list).toArray(new Predicate[0])));
                     }
                 }
             }
         }
         return predicates;
     }
+
 }

@@ -17,7 +17,7 @@ public final class AesUtil {
     public static Key generateKey() throws Exception {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG");
-        secureRandom.setSeed(AesUtil.class.getName().getBytes(StandardCharsets.UTF_8));
+        secureRandom.setSeed(GeneratorUtil.random().getBytes(StandardCharsets.UTF_8));
         keyGenerator.init(256, secureRandom);
         return keyGenerator.generateKey();
     }

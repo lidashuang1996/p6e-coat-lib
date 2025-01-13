@@ -13,9 +13,11 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 
-import java.io.File;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -31,6 +33,8 @@ import java.util.Map;
  * @version 1.0
  */
 public final class HttpUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HttpUtil.class);
 
     private static final HttpClient HTTP_CLIENT = HttpClients.createDefault();
 
@@ -63,6 +67,7 @@ public final class HttpUtil {
             httpGet.setURI(URI.create(url));
             return doGet(httpClient, httpGet, HttpUtil::resultToString);
         } catch (Exception e) {
+            LOGGER.error("[ HTTP UTIL ] GET ERROR >>> ", e);
             return null;
         }
     }
@@ -92,6 +97,7 @@ public final class HttpUtil {
             httpGet.setURI(URI.create(url));
             return doGet(httpClient, httpGet, HttpUtil::resultToInputStream);
         } catch (Exception e) {
+            LOGGER.error("[ HTTP UTIL ] GET FILE ERROR >>> ", e);
             return null;
         }
     }
@@ -117,7 +123,7 @@ public final class HttpUtil {
         try {
             return doPost(HTTP_CLIENT, url, headers, httpEntity);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("[ HTTP UTIL ] POST ERROR >>> ", e);
             return null;
         }
     }
@@ -126,13 +132,13 @@ public final class HttpUtil {
         try {
             if (headers == null) {
                 headers = new HashMap<>();
-                headers.put(HttpHeaders.CONTENT_TYPE, "application/json");
+                headers.put(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
             } else {
-                headers.putIfAbsent(HttpHeaders.CONTENT_TYPE, "application/json");
+                headers.putIfAbsent(HttpHeaders.CONTENT_TYPE, "application/json;charset=UTF-8");
             }
-            return doPost(httpClient, url, headers, new StringEntity(params));
+            return doPost(httpClient, url, headers, new StringEntity(params, StandardCharsets.UTF_8));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("[ HTTP UTIL ] POST ERROR >>> ", e);
             return null;
         }
     }
@@ -141,9 +147,9 @@ public final class HttpUtil {
         try {
             if (headers == null) {
                 headers = new HashMap<>();
-                headers.put(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                headers.put(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=UTF-8");
             } else {
-                headers.putIfAbsent(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded");
+                headers.putIfAbsent(HttpHeaders.CONTENT_TYPE, "application/x-www-form-urlencoded;charset=UTF-8");
             }
             final List<BasicNameValuePair> list = new ArrayList<>();
             if (params != null) {
@@ -152,7 +158,7 @@ public final class HttpUtil {
             }
             return doPost(httpClient, url, headers, new UrlEncodedFormEntity(list));
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("[ HTTP UTIL ] POST ERROR >>> ", e);
             return null;
         }
     }
@@ -179,39 +185,52 @@ public final class HttpUtil {
         return httpClient.execute(httpUriRequest, responseHandler);
     }
 
-    private static String resultToString(HttpResponse httpResponse) throws IOException {
+    private static String resultToString(HttpResponse httpResponse) {
         try {
             if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                return EntityUtils.toString(httpResponse.getEntity());
+                return EntityUtils.toString(httpResponse.getEntity(), StandardCharsets.UTF_8);
             } else {
+                LOGGER.error("[ HTTP UTIL ] RESULT TO STRING HTTP CODE NOT SC_OK");
                 return null;
             }
         } catch (Exception e) {
+            LOGGER.error("[ HTTP UTIL ] RESULT TO STRING ERROR >>> ", e);
             return null;
         } finally {
             if (httpResponse != null) {
                 final HttpEntity resultHttpEntity = httpResponse.getEntity();
-                if (resultHttpEntity != null && resultHttpEntity.getContent() != null) {
-                    resultHttpEntity.getContent().close();
+                try {
+                    if (resultHttpEntity != null && resultHttpEntity.getContent() != null) {
+                        resultHttpEntity.getContent().close();
+                    }
+                } catch (Exception ee) {
+                    LOGGER.error("[ HTTP UTIL ] STRING CLOSE ERROR >>> ", ee);
                 }
             }
         }
     }
 
-    private static InputStream resultToInputStream(HttpResponse httpResponse) throws IOException {
-        HttpEntity httpEntity = null;
+    private static InputStream resultToInputStream(HttpResponse httpResponse) {
         try {
             if (httpResponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
-                httpEntity = httpResponse.getEntity();
-                return httpEntity.getContent();
+                return new ByteArrayInputStream(EntityUtils.toByteArray(httpResponse.getEntity()));
             } else {
+                LOGGER.error("[ HTTP UTIL ] RESULT TO INPUT STREAM HTTP CODE NOT SC_OK");
                 return null;
             }
         } catch (Exception e) {
+            LOGGER.error("[ HTTP UTIL ] RESULT TO INPUT STREAM ERROR >>> ", e);
             return null;
         } finally {
-            if (httpResponse != null && httpEntity != null && httpEntity.getContent() != null) {
-                httpEntity.getContent().close();
+            if (httpResponse != null) {
+                final HttpEntity resultHttpEntity = httpResponse.getEntity();
+                try {
+                    if (resultHttpEntity != null && resultHttpEntity.getContent() != null) {
+                        resultHttpEntity.getContent().close();
+                    }
+                } catch (Exception ee) {
+                    LOGGER.error("[ HTTP UTIL ] INPUT STREAM CLOSE ERROR >>> ", ee);
+                }
             }
         }
     }
